@@ -33,10 +33,10 @@ class GameViewController: UIViewController {
         if let scene = GameScene.unarchiveFromFile("GameScene") as? GameScene {
             // Configure the view.
             let skView = self.view as! SKView
-            skView.showsFPS = true
-            skView.showsNodeCount = true
-			skView.showsDrawCount = true
-            
+//            skView.showsFPS = true
+//            skView.showsNodeCount = true
+//			skView.showsDrawCount = true
+			
             /* Sprite Kit applies additional optimizations to improve rendering performance */
             skView.ignoresSiblingOrder = true
             
@@ -45,6 +45,7 @@ class GameViewController: UIViewController {
 			scene.anchorPoint = CGPoint(x: 0.5, y: 0.5)
 			scene.anchorPoint = CGPoint(x: 0, y: 0.25)
 			scene.size = skView.bounds.size
+			scene.backgroundColor = UIColor(white: 0.1, alpha: 1)
             
             skView.presentScene(scene)
         }
