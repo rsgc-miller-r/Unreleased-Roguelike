@@ -21,6 +21,7 @@ class Stage
 	
 	func generate()
 	{
+		println("*  WORLD | Starting.")
 		generateBlankStage()
 		generatePathways()
 		generatePathwaysBleed()
@@ -35,16 +36,26 @@ class Stage
 		addWalls()
 		addPickup()
 		
-		if( stageSize() < 200 ){
+		if( stageSize() < 150 ){
+			println("!  WORLD | Too small:\(stageSize())")
 			generate()
 		}
-		if (find(activeStage, tile.pickup) == nil) {
+			/*
+		else if (find(activeStage, tile.pickup) == nil) {
+			println("!  WORLD | Starting Over, missing pickup")
 			generate()
 		}
+*/
+		else{
+			println("*  WORLD | Ready!")
+		}
+		
 	}
 	
 	func generateBlankStage()
 	{
+		println("+  WORLD | Creating Blank..")
+		
 		var updatedMap:Array = [tile.outside]
 		
 		var x:CGFloat = 0
@@ -58,16 +69,17 @@ class Stage
 	
 	func generatePathways()
 	{
+		println("+  WORLD | Creating Pathways..")
 		var updatedMap:Array = activeStage
 		
 		// Make the rooms
 		var i:Int = 0
-		while( i < 10000){
+		while( i < 5000){
 			
 			let posX = CGFloat(arc4random_uniform(UInt32(tileCountX)))
 			let posY = CGFloat(arc4random_uniform(UInt32(tileCountY)))
-			let width = CGFloat(arc4random_uniform(10)) + 2
-			let height = CGFloat(arc4random_uniform(10)) + 2
+			let width = CGFloat(arc4random_uniform(8)) + 1
+			let height = CGFloat(arc4random_uniform(8)) + 1
 			
 			// Don't create on edges
 			if( posX == 0 ){ continue }
@@ -88,6 +100,7 @@ class Stage
 	
 	func generatePathwaysBleed()
 	{
+		println("+  WORLD | Creating Bleeds..")
 		var updatedMap:Array = activeStage
 		
 		var index = 0
@@ -129,6 +142,7 @@ class Stage
 	
 	func generateRoomsBleed()
 	{
+		println("+  WORLD | Creating Bleeds..")
 		var updatedMap:Array = activeStage
 		
 		// Collapse Walls
@@ -165,6 +179,7 @@ class Stage
 	
 	func generateRoomsFill()
 	{
+		println("+  WORLD | Creating Fill..")
 		var updatedMap:Array = activeStage
 		
 		var index = 0
@@ -211,6 +226,7 @@ class Stage
 	
 	func generateRoomsTrim()
 	{
+		println("+  WORLD | Creating Trim..")
 		var updatedMap:Array = activeStage
 		
 		// Collapse Walls
@@ -231,6 +247,7 @@ class Stage
 	
 	func addWalls()
 	{
+		println("+  WORLD | Adding Walls..")
 		var updatedMap:Array = activeStage
 		
 		// Collapse Walls
@@ -261,6 +278,7 @@ class Stage
 	
 	func addExit()
 	{
+		println("+  WORLD | Adding Exit..")
 		var updatedMap:Array = activeStage
 		
 		var exitX:Int = 0
@@ -292,12 +310,12 @@ class Stage
 		}
 		
 		updatedMap[indexAtLocation(exitX, y: exitY)] = tile.exit
-		println("Distance: \(furthestDistance) \(exitX) - \(exitY)")
 		activeStage = updatedMap
 	}
 	
 	func addSpawn()
 	{
+		println("+  WORLD | Adding Spawn..")
 		var updatedMap:Array = activeStage
 		
 		// Collapse Walls
@@ -319,6 +337,7 @@ class Stage
 	
 	func addPickup()
 	{
+		println("+  WORLD | Adding Pickup..")
 		var updatedMap:Array = activeStage
 		
 		// Collapse Walls

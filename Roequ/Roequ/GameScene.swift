@@ -22,10 +22,11 @@ enum tile:UInt32 {
 	case limit = 99
 }
 
-let tileCountX:CGFloat = 45
-let tileCountY:CGFloat = 45
+let tileCountX:CGFloat = 39
+let tileCountY:CGFloat = 39
 var tileSize:CGFloat = 0
-var currentStage:Stage = Stage()
+var currentStage:Stage!
+var player:Player!
 
 class GameScene: SKScene {
 	
@@ -33,19 +34,19 @@ class GameScene: SKScene {
 	{
 		tileSize = self.frame.size.width/CGFloat(tileCountX)
 		
+		currentStage = Stage()
+		player = Player(spawn: currentStage.spawn)
 		
-		
-		drawView()
-		
-//		drawStage()
+		gameView()
+//		mapView()
     }
 	
-	func drawView()
+	func gameView()
 	{
-		let viewScale:CGFloat = 3
+		let viewScale:CGFloat = 2
 		let tileSize = self.frame.size.width/CGFloat(tileCountX/viewScale)
 		let offset:CGFloat = (tileSize/2)
-		let stage = Stage().activeStage
+		let stage = currentStage.activeStage
 		
 		let horizontalTiles = tileCountX/viewScale
 		let verticalTiles = tileCountY/viewScale
@@ -59,8 +60,8 @@ class GameScene: SKScene {
 				let sprite = SKSpriteNode(color: UIColor.redColor(), size: CGSize(width: tileSize, height: tileSize))
 				sprite.position = CGPoint(x: CGFloat(x) * tileSize + offset, y: CGFloat(y) * tileSize + offset)
 				
-				let horizontalOffset = Int(currentStage.spawn.x) - Int(horizontalTiles/2)
-				let verticalOffset = Int(currentStage.spawn.y) - Int(verticalTiles/2) - 1
+				let horizontalOffset = player.x - Int(horizontalTiles/2)
+				let verticalOffset = player.y - Int(verticalTiles/2) - 1
 				
 				let targetTile = currentStage.tileAtLocation(x + horizontalOffset, y: y + verticalOffset )
 				
@@ -82,7 +83,7 @@ class GameScene: SKScene {
 		
 	}
 	
-	func drawStage()
+	func mapView()
 	{
 		let testArray = Stage().activeStage
 		
