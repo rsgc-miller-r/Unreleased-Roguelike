@@ -24,7 +24,8 @@ enum tile:UInt32 {
 
 let tileCountX:CGFloat = 39
 let tileCountY:CGFloat = 39
-var tileSize:CGFloat = 0
+var tileSizeX:CGFloat = 0
+var tileSizeY:CGFloat = 0
 var currentStage:Stage!
 var player:Player!
 
@@ -32,7 +33,8 @@ class GameScene: SKScene {
 	
     override func didMoveToView(view: SKView)
 	{
-		tileSize = self.frame.size.width/CGFloat(tileCountX)
+		tileSizeX = self.frame.size.width/CGFloat(tileCountX)
+		tileSizeY = tileSizeX * 1.3
 		
 		currentStage = Stage()
 		player = Player(spawn: currentStage.spawn)
@@ -44,8 +46,10 @@ class GameScene: SKScene {
 	func gameView()
 	{
 		let viewScale:CGFloat = 2
-		let tileSize = self.frame.size.width/CGFloat(tileCountX/viewScale)
-		let offset:CGFloat = (tileSize/2)
+		let tileSizeX = self.frame.size.width/CGFloat(tileCountX/viewScale)
+		let tileSizeY = tileSizeX * 1.5
+		let offsetX:CGFloat = (tileSizeX/2)
+		let offsetY:CGFloat = (tileSizeY/2)
 		let stage = currentStage.activeStage
 		
 		let horizontalTiles = tileCountX/viewScale
@@ -57,8 +61,8 @@ class GameScene: SKScene {
 			var y = 0
 			while y < Int(verticalTiles) {
 				
-				let sprite = SKSpriteNode(color: UIColor.redColor(), size: CGSize(width: tileSize, height: tileSize))
-				sprite.position = CGPoint(x: CGFloat(x) * tileSize + offset, y: CGFloat(y) * tileSize + offset)
+				let sprite = SKSpriteNode(color: UIColor.redColor(), size: CGSize(width: tileSizeX, height: tileSizeY))
+				sprite.position = CGPoint(x: CGFloat(x) * tileSizeX + offsetX, y: CGFloat(y) * tileSizeY + offsetY)
 				
 				let horizontalOffset = player.x - Int(horizontalTiles/2)
 				let verticalOffset = player.y - Int(verticalTiles/2) - 1
@@ -92,14 +96,14 @@ class GameScene: SKScene {
 	{
 		let testArray = Stage().activeStage
 		
-		let offset:CGFloat = (tileSize/2)
+		let offset:CGFloat = (tileSizeX/2)
 		
 		var x:CGFloat = 0
 		while(x < tileCountX){
 			var y:CGFloat = 0
 			while(y < tileCountX){
-				let sprite = SKSpriteNode(color: UIColor.redColor(), size: CGSize(width: tileSize, height: tileSize))
-				sprite.position = CGPoint(x: x * tileSize + offset, y: y * tileSize + offset)
+				let sprite = SKSpriteNode(color: UIColor.redColor(), size: CGSize(width: tileSizeX, height: tileSizeX))
+				sprite.position = CGPoint(x: x * tileSizeX + offset, y: y * tileSizeX + offset)
 				
 				let lookup:Int = Int(tileCountX*y)+Int(x)
 				if( testArray[lookup] == tile.outside ){
@@ -146,8 +150,8 @@ class GameScene: SKScene {
 			var xMod = 0
 			var yMod = 0
 			
-			if location.y > 270 { yMod = 1 }
-			else if location.y < 50   { yMod = -1 }
+			if location.y > 380 { yMod = 1 }
+			else if location.y < 60   { yMod = -1 }
 			else if location.x < 160   { xMod = -1 }
 			else { xMod = 1 }
 			
