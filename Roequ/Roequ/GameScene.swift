@@ -22,17 +22,69 @@ enum tile:UInt32 {
 	case limit = 99
 }
 
-let tileCountX:CGFloat = 35
-let tileCountY:CGFloat = 35
+let tileCountX:CGFloat = 39
+let tileCountY:CGFloat = 39
 var tileSize:CGFloat = 0
+var currentStage:Stage = Stage()
 
 class GameScene: SKScene {
 	
     override func didMoveToView(view: SKView)
 	{
 		tileSize = self.frame.size.width/CGFloat(tileCountX)
-		drawStage()
+		
+		
+		
+		drawView()
+		
+//		drawStage()
     }
+	
+	func drawView()
+	{
+		let viewScale:CGFloat = 3
+		let tileSize = self.frame.size.width/CGFloat(tileCountX/viewScale)
+		let offset:CGFloat = (tileSize/2)
+		let testArray = Stage().generate()
+		
+		let horizontalTiles = tileCountX/viewScale
+		let verticalTiles = tileCountY/viewScale
+		
+		// Look at spawn
+		let spawnIndex = find(testArray, tile.spawn)
+		let spawnX:Int = Int(spawnIndex! % Int(tileCountX))
+		let spawnY:Int = Int(spawnIndex! / Int(tileCountY))
+		
+		println("Draw:\(horizontalTiles) x \(verticalTiles)")
+		
+		
+		var x = 0
+		while x < Int(horizontalTiles) {
+			
+			var y = 0
+			while y < Int(verticalTiles) {
+				
+				let sprite = SKSpriteNode(color: UIColor.redColor(), size: CGSize(width: tileSize, height: tileSize))
+				sprite.position = CGPoint(x: CGFloat(x) * tileSize + offset, y: CGFloat(y) * tileSize + offset)
+				
+//				let tile = currentStage.tileAtLocation(x: x, y: y)
+				
+				
+				if x % 2 == 0 {
+					sprite.color = UIColor.whiteColor()
+				}
+				else{
+					sprite.color = UIColor.redColor()
+				}
+				
+				println("Draw Tile #\(x) #\(y)")
+				self.addChild(sprite)
+				y += 1
+			}
+			x += 1
+		}
+		
+	}
 	
 	func drawStage()
 	{
