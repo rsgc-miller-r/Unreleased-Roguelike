@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		573F7DA11AF127C300AF54FE /* Stage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573F7DA01AF127C300AF54FE /* Stage.swift */; };
 		57FE89A21AEE8E65002B5EAA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57FE89A11AEE8E65002B5EAA /* AppDelegate.swift */; };
 		57FE89A41AEE8E65002B5EAA /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 57FE89A31AEE8E65002B5EAA /* GameScene.sks */; };
 		57FE89A61AEE8E65002B5EAA /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57FE89A51AEE8E65002B5EAA /* GameScene.swift */; };
@@ -28,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		573F7DA01AF127C300AF54FE /* Stage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stage.swift; sourceTree = "<group>"; };
 		57FE899C1AEE8E65002B5EAA /* Roequ.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Roequ.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		57FE89A01AEE8E65002B5EAA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		57FE89A11AEE8E65002B5EAA /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -85,6 +87,7 @@
 				57FE89A31AEE8E65002B5EAA /* GameScene.sks */,
 				57FE89A71AEE8E65002B5EAA /* GameViewController.swift */,
 				57FE89A51AEE8E65002B5EAA /* GameScene.swift */,
+				573F7DA01AF127C300AF54FE /* Stage.swift */,
 				57FE89A91AEE8E65002B5EAA /* Main.storyboard */,
 				57FE89AC1AEE8E65002B5EAA /* Images.xcassets */,
 				57FE89AE1AEE8E65002B5EAA /* LaunchScreen.xib */,
@@ -221,6 +224,7 @@
 			files = (
 				57FE89A61AEE8E65002B5EAA /* GameScene.swift in Sources */,
 				57FE89A81AEE8E65002B5EAA /* GameViewController.swift in Sources */,
+				573F7DA11AF127C300AF54FE /* Stage.swift in Sources */,
 				57FE89A21AEE8E65002B5EAA /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -417,6 +421,7 @@
 				57FE89C11AEE8E65002B5EAA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		57FE89C21AEE8E65002B5EAA /* Build configuration list for PBXNativeTarget "RoequTests" */ = {
 			isa = XCConfigurationList;
@@ -425,6 +430,7 @@
 				57FE89C41AEE8E65002B5EAA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
