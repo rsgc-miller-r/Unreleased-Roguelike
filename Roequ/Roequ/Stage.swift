@@ -112,26 +112,26 @@ class Stage
 			let currentY:Int = Int(index / Int(tileCountY))
 			
 			// Connect close rooms
-			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside ){
-				if( tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX-1, y: currentY) == tile.floor ){
+			if( tileAtLocation( currentX, y: currentY) == tile.outside ){
+				if( tileAtLocation( currentX+1, y: currentY) == tile.floor && tileAtLocation(  currentX-1, y: currentY) == tile.floor ){
 					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
 				}
-				if( tileAtLocation(updatedMap, x: currentX, y: currentY+1) == tile.floor && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.floor ){
+				if( tileAtLocation( currentX, y: currentY+1) == tile.floor && tileAtLocation(  currentX, y: currentY-1) == tile.floor ){
 					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
 				}
 			}
 			// Expand to the edges
-			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside ){
-				if( tileAtLocation(updatedMap, x: currentX+3, y: currentY) == tile.limit && currentX == Int(tileCountX) - 2 && tileAtLocation(updatedMap, x: currentX-1, y: currentY) == tile.floor ){
+			if( tileAtLocation( currentX, y: currentY) == tile.outside ){
+				if( tileAtLocation( currentX+3, y: currentY) == tile.limit && currentX == Int(tileCountX) - 2 && tileAtLocation(  currentX-1, y: currentY) == tile.floor ){
 					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
 				}
-				if( tileAtLocation(updatedMap, x: currentX-3, y: currentY) == tile.limit && currentX == 1 && tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.floor ){
+				if( tileAtLocation( currentX-3, y: currentY) == tile.limit && currentX == 1 && tileAtLocation(  currentX+1, y: currentY) == tile.floor ){
 					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
 				}
-				if( tileAtLocation(updatedMap, x: currentX, y: currentY+3) == tile.limit && currentY == Int(tileCountY) - 2 && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.floor ){
+				if( tileAtLocation( currentX, y: currentY+3) == tile.limit && currentY == Int(tileCountY) - 2 && tileAtLocation(  currentX, y: currentY-1) == tile.floor ){
 					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
 				}
-				if( tileAtLocation(updatedMap, x: currentX, y: currentY-3) == tile.limit && currentY == 1 && tileAtLocation(updatedMap, x: currentX, y: currentY+1) == tile.floor ){
+				if( tileAtLocation( currentX, y: currentY-3) == tile.limit && currentY == 1 && tileAtLocation(  currentX, y: currentY+1) == tile.floor ){
 					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
 				}
 			}
@@ -153,7 +153,7 @@ class Stage
 			let currentX:Int = Int(index % Int(tileCountX))
 			let currentY:Int = Int(index / Int(tileCountY))
 			
-			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside && tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.outside && tileAtLocation(updatedMap, x: currentX+2, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX-2, y: currentY) == tile.floor ){
+			if( tileAtLocation( currentX, y: currentY) == tile.outside && tileAtLocation(  currentX+1, y: currentY) == tile.outside && tileAtLocation(  currentX+2, y: currentY) == tile.floor && tileAtLocation(  currentX-2, y: currentY) == tile.floor ){
 				updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
 				updatedMap[indexAtLocation(currentX+1, y: currentY)] = tile.floor
 			}
@@ -168,7 +168,7 @@ class Stage
 			let currentX:Int = Int(index % Int(tileCountX))
 			let currentY:Int = Int(index / Int(tileCountY))
 			
-			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside && tileAtLocation(updatedMap, x: currentX, y: currentY+1) == tile.floor && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.floor ){
+			if( tileAtLocation( currentX, y: currentY) == tile.outside && tileAtLocation(  currentX, y: currentY+1) == tile.floor && tileAtLocation(  currentX, y: currentY-1) == tile.floor ){
 				updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
 			}
 			
@@ -206,10 +206,10 @@ class Stage
 						if( updatedMap[subIndex] == tile.focus && updatedMap[indexAtLocation(focusX-1, y: focusY)] == tile.floor ){
 							updatedMap[indexAtLocation(focusX-1, y: focusY)] = tile.focus
 						}
-						if( updatedMap[subIndex] == tile.focus && tileAtLocation(updatedMap, x: focusX, y: focusY+1) == tile.floor ){
+						if( updatedMap[subIndex] == tile.focus && tileAtLocation( focusX, y: focusY+1) == tile.floor ){
 							updatedMap[indexAtLocation(focusX, y: focusY+1)] = tile.focus
 						}
-						if( updatedMap[subIndex] == tile.focus && tileAtLocation(updatedMap, x: focusX, y: focusY-1) == tile.floor ){
+						if( updatedMap[subIndex] == tile.focus && tileAtLocation( focusX, y: focusY-1) == tile.floor ){
 							updatedMap[indexAtLocation(focusX, y: focusY-1)] = tile.focus
 						}
 						subIndex += 1
@@ -242,6 +242,7 @@ class Stage
 		activeStage = updatedMap
 	}
 	
+	// MARK: Add Events -
 	
 	func addWalls()
 	{
@@ -255,7 +256,7 @@ class Stage
 			let currentY:Int = Int(index / Int(tileCountY))
 			
 			// Vertical Sections
-			if tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside && tileAtLocation(updatedMap, x: currentX-1, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX+2, y: currentY+1) == tile.floor && tileAtLocation(updatedMap, x: currentX+3, y: currentY+1) == tile.floor {
+			if tileAtLocation(  currentX, y: currentY) == tile.outside && tileAtLocation(  currentX-1, y: currentY) == tile.floor && tileAtLocation(  currentX+2, y: currentY+1) == tile.floor && tileAtLocation(  currentX+3, y: currentY+1) == tile.floor {
 				var check = 1
 				while check < 30 {
 					if updatedMap[indexAtLocation(currentX, y: currentY+check)] == tile.floor {
@@ -294,9 +295,9 @@ class Stage
 			let currentX:Int = Int(index % Int(tileCountX))
 			let currentY:Int = Int(index / Int(tileCountY))
 			
-			// tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.floor
+			// tileAtLocation(  currentX, y: currentY) == tile.floor
 			
-			if abs(spawnX - currentX) + abs(spawnY - currentY) > furthestDistance && tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX-1, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX, y: currentY+1) == tile.outside && tileAtLocation(updatedMap, x: currentX+1, y: currentY+1) == tile.outside && tileAtLocation(updatedMap, x: currentX-1, y: currentY+1) == tile.outside {
+			if abs(spawnX - currentX) + abs(spawnY - currentY) > furthestDistance && tileAtLocation(  currentX, y: currentY) == tile.floor && tileAtLocation(  currentX+1, y: currentY) == tile.floor && tileAtLocation(  currentX-1, y: currentY) == tile.floor && tileAtLocation(  currentX, y: currentY+1) == tile.outside && tileAtLocation(  currentX+1, y: currentY+1) == tile.outside && tileAtLocation(  currentX-1, y: currentY+1) == tile.outside {
 				furthestDistance = abs(spawnX - currentX) + abs(spawnY - currentY)
 				exitX = currentX
 				exitY = currentY+1
@@ -322,7 +323,7 @@ class Stage
 			let currentX:Int = Int(randomIndex % Int(tileCountX))
 			let currentY:Int = Int(randomIndex / Int(tileCountY))
 			
-			if tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX-1, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.outside && tileAtLocation(updatedMap, x: currentX+1, y: currentY-1) == tile.outside && tileAtLocation(updatedMap, x: currentX-1, y: currentY-1) == tile.outside {
+			if tileAtLocation(  currentX, y: currentY) == tile.floor && tileAtLocation(  currentX-1, y: currentY) == tile.floor && tileAtLocation(  currentX+1, y: currentY) == tile.floor && tileAtLocation(  currentX, y: currentY-1) == tile.outside && tileAtLocation(  currentX+1, y: currentY-1) == tile.outside && tileAtLocation(  currentX-1, y: currentY-1) == tile.outside {
 				updatedMap[indexAtLocation(currentX, y: currentY-1)] = tile.spawn
 				spawnCreated = 1
 			}
@@ -347,26 +348,26 @@ class Stage
 			if findFloor == nil && CGFloat(currentX) + 2 < tileCountX - 1 && CGFloat(currentY) + 2 < tileCountY - 1 && CGFloat(currentX) < tileCountX - 5 {
 				
 				// Bottom
-				if indexAtLocation(currentX+2, y: currentY) < Int(tileCountX * tileCountY) && indexAtLocation(currentX+2, y: currentY-1) > 0 && tileAtLocation(updatedMap, x: currentX+2, y: currentY-1) == tile.floor {
+				if indexAtLocation(currentX+2, y: currentY) < Int(tileCountX * tileCountY) && indexAtLocation(currentX+2, y: currentY-1) > 0 && tileAtLocation(  currentX+2, y: currentY-1) == tile.floor {
 					updatedMap = mapArea(CGRectMake(CGFloat(currentX)+1,CGFloat(currentY)+1,2,2),targetMap: updatedMap,tileType: tile.floor)
 					updatedMap[indexAtLocation(currentX+2, y: currentY)] = tile.section
 					updatedMap[indexAtLocation(currentX+2, y: currentY+2)] = tile.pickup
 				}
 					// Right
-				else if indexAtLocation(currentX+4, y: currentY+2) < Int(tileCountX * tileCountY) && indexAtLocation(currentX+4, y: currentY+2) > 0 && tileAtLocation(updatedMap, x: currentX+5, y: currentY+2) == tile.floor {
+				else if indexAtLocation(currentX+4, y: currentY+2) < Int(tileCountX * tileCountY) && indexAtLocation(currentX+4, y: currentY+2) > 0 && tileAtLocation(  currentX+5, y: currentY+2) == tile.floor {
 					updatedMap = mapArea(CGRectMake(CGFloat(currentX)+1,CGFloat(currentY)+1,2,2),targetMap: updatedMap,tileType: tile.floor)
 					updatedMap[indexAtLocation(currentX+4, y: currentY+2)] = tile.section
 					updatedMap[indexAtLocation(currentX+2, y: currentY+2)] = tile.pickup
 				}
 					// Top
-				else if indexAtLocation(currentX+2, y: currentY+4) < Int(tileCountX * tileCountY) && indexAtLocation(currentX+2, y: currentY+4) > 0 && tileAtLocation(updatedMap, x: currentX+2, y: currentY+5) == tile.floor {
+				else if indexAtLocation(currentX+2, y: currentY+4) < Int(tileCountX * tileCountY) && indexAtLocation(currentX+2, y: currentY+4) > 0 && tileAtLocation(  currentX+2, y: currentY+5) == tile.floor {
 					updatedMap = mapArea(CGRectMake(CGFloat(currentX)+1,CGFloat(currentY)+1,2,2),targetMap: updatedMap,tileType: tile.floor)
 					updatedMap[indexAtLocation(currentX+2, y: currentY+4)] = tile.section
 					updatedMap[indexAtLocation(currentX+2, y: currentY+2)] = tile.pickup
 				}
 					
 					// Left
-				else if indexAtLocation(currentX, y: currentY+2) < Int(tileCountX * tileCountY) && indexAtLocation(currentX, y: currentY+2) > 0 && tileAtLocation(updatedMap, x: currentX-1, y: currentY+2) == tile.floor {
+				else if indexAtLocation(currentX, y: currentY+2) < Int(tileCountX * tileCountY) && indexAtLocation(currentX, y: currentY+2) > 0 && tileAtLocation(  currentX-1, y: currentY+2) == tile.floor {
 					updatedMap = mapArea(CGRectMake(CGFloat(currentX)+1,CGFloat(currentY)+1,2,2),targetMap: updatedMap,tileType: tile.floor)
 					updatedMap[indexAtLocation(currentX, y: currentY+2)] = tile.section
 					updatedMap[indexAtLocation(currentX+2, y: currentY+2)] = tile.pickup
@@ -379,6 +380,8 @@ class Stage
 		}
 		activeStage = updatedMap
 	}
+	
+	// MARK: Tools -
 	
 	func removeFocus()
 	{
@@ -438,7 +441,7 @@ class Stage
 		return updatedMap
 	}
 	
-	func tileAtLocation(targetMap:Array<tile>,x:Int,y:Int) -> tile
+	func tileAtLocation(x:Int,y:Int) -> tile
 	{
 		let index = indexAtLocation(x,y: y)
 		
@@ -448,7 +451,7 @@ class Stage
 		if(y > Int(tileCountY) ){ return tile.limit }
 		
 		if ( index >= 0 && index <= Int(tileCountX) * Int(tileCountY) ){
-			return targetMap[index]
+			return activeStage[index]
 		}
 		
 		return tile.limit
@@ -458,6 +461,4 @@ class Stage
 	{
 		return (y * Int(tileCountX)) + x
 	}
-	
-	
 }
