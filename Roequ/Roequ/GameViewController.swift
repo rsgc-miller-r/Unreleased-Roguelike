@@ -45,7 +45,7 @@ class GameViewController: UIViewController {
 			scene.anchorPoint = CGPoint(x: 0.5, y: 0.5)
 			scene.anchorPoint = CGPoint(x: 0, y: 0.25)
 			scene.size = skView.bounds.size
-			scene.backgroundColor = UIColor(white: 0.1, alpha: 1)
+			scene.backgroundColor = UIColor(white: 0, alpha: 1)
             
             skView.presentScene(scene)
         }

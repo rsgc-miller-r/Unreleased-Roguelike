@@ -8,8 +8,8 @@
 
 import SpriteKit
 
-let tileCountX:CGFloat = 32
-let tileCountY:CGFloat = 32
+let tileCountX:CGFloat = 35
+let tileCountY:CGFloat = 35
 var tileSize:CGFloat = 0
 
 let typeOutside:Int = 1
@@ -21,10 +21,15 @@ enum tile:UInt32 {
 	case outside = 1
 	case floor = 2
 	case section = 3
+	case focus = 4
+	case room = 5
+	case roomCenter = 6
+	case roomConnected = 7
 	case limit = 99
 }
 
 class GameScene: SKScene {
+	
     override func didMoveToView(view: SKView)
 	{
 		tileSize = self.frame.size.width/CGFloat(tileCountX)
@@ -33,28 +38,161 @@ class GameScene: SKScene {
 	
 	func generateRooms() -> Array<tile>
 	{
-		var testArray:Array = [tile.outside]
+		var updatedMap:Array = [tile.outside]
 		
 		var x:CGFloat = 0
 		while( x < tileCountX * tileCountY ){
-			testArray.append(tile.outside)
+			updatedMap.append(tile.outside)
 			x += 1
 		}
 		
-		testArray = makeRooms(testArray)
-		testArray = bleedRooms(testArray)
+		updatedMap = makePathways(updatedMap)
+		updatedMap = bleedPathways(updatedMap)
+		updatedMap = bleedRooms(updatedMap)
+		updatedMap = bleedRooms(updatedMap)
+		updatedMap = fillRooms(updatedMap)
+		updatedMap = trimRooms(updatedMap)
+		updatedMap = removeFocus(updatedMap)
+		updatedMap = addSpecialRooms(updatedMap)
+		updatedMap = addSpecialRooms(updatedMap)
+		updatedMap = addSpecialRooms(updatedMap)
 		
+		// Level size
+		var index = 0
+		var mapSize = 0
+		while( index < updatedMap.count ){
+			if( updatedMap[index] == tile.floor ){
+				mapSize += 1
+			}
+			index += 1
+		}
+		println(mapSize)
+
+		if( mapSize < 300 ){
+			updatedMap = generateRooms()
+		}
 		
+		return updatedMap
+	}
+	
+	func addSpecialRooms(targetMap:Array<tile>) -> Array<tile>
+	{
+		var updatedMap:Array = targetMap
 		
+		// Collapse Walls
+		var index = 0
+		while( index < targetMap.count ){
+			
+			let currentX:Int = Int(index % Int(tileCountX))
+			let currentY:Int = Int(index / Int(tileCountY))
+			
+			let findFloor = locateTileType(CGRectMake(CGFloat(currentX),CGFloat(currentY),4,4), targetMap: updatedMap, tileType: tile.floor)
+			
+			if findFloor == nil && CGFloat(currentX) + 2 < tileCountX - 1 && CGFloat(currentY) + 2 < tileCountY - 1 {
+				
+				// Bottom
+				if indexAtLocation(currentX+2, y: currentY) < Int(tileCountX * tileCountY) && indexAtLocation(currentX+2, y: currentY-1) > 0 && tileAtLocation(updatedMap, x: currentX+2, y: currentY-1) == tile.floor {
+					updatedMap = mapArea(CGRectMake(CGFloat(currentX)+1,CGFloat(currentY)+1,2,2),targetMap: updatedMap,tileType: tile.floor)
+					updatedMap[indexAtLocation(currentX+2, y: currentY)] = tile.section
+				}
+				// Right
+				else if indexAtLocation(currentX+4, y: currentY+2) < Int(tileCountX * tileCountY) && indexAtLocation(currentX+4, y: currentY+2) > 0 && tileAtLocation(updatedMap, x: currentX+5, y: currentY+2) == tile.floor {
+					updatedMap = mapArea(CGRectMake(CGFloat(currentX)+1,CGFloat(currentY)+1,2,2),targetMap: updatedMap,tileType: tile.floor)
+					updatedMap[indexAtLocation(currentX+4, y: currentY+2)] = tile.section
+				}
+				// Top
+				else if indexAtLocation(currentX+2, y: currentY+4) < Int(tileCountX * tileCountY) && indexAtLocation(currentX+2, y: currentY+4) > 0 && tileAtLocation(updatedMap, x: currentX+2, y: currentY+5) == tile.floor {
+					updatedMap = mapArea(CGRectMake(CGFloat(currentX)+1,CGFloat(currentY)+1,2,2),targetMap: updatedMap,tileType: tile.floor)
+					updatedMap[indexAtLocation(currentX+2, y: currentY+4)] = tile.focus
+				}
+				
+				// Left
+				else if indexAtLocation(currentX, y: currentY+2) < Int(tileCountX * tileCountY) && indexAtLocation(currentX, y: currentY+2) > 0 && tileAtLocation(updatedMap, x: currentX-1, y: currentY+2) == tile.floor {
+					updatedMap = mapArea(CGRectMake(CGFloat(currentX)+1,CGFloat(currentY)+1,2,2),targetMap: updatedMap,tileType: tile.floor)
+					updatedMap[indexAtLocation(currentX, y: currentY+2)] = tile.focus
+				}
+				
+				break
+			}
+			
+			index += 1
+		}
+		return updatedMap
+	}
+	
+	
+	func removeFocus(targetMap:Array<tile>) -> Array<tile>
+	{
+		var updatedMap:Array = targetMap
 		
-		// Bleed the rooms to the edges
+		// Collapse Walls
+		var index = 0
+		while( index < targetMap.count ){
+			
+			if updatedMap[index] == tile.focus {
+				updatedMap[index] = tile.floor
+			}
+			index += 1
+		}
 		
+		return updatedMap
+	}
+	
+	func trimRooms(targetMap:Array<tile>) -> Array<tile>
+	{
+		var updatedMap:Array = targetMap
 		
+		// Collapse Walls
+		var index = 0
+		while( index < targetMap.count ){
+			
+			if updatedMap[index] == tile.floor {
+				updatedMap[index] = tile.outside
+			}
+			
+			index += 1
+		}
 		
-		return testArray
+		return updatedMap
 	}
 	
 	func bleedRooms(targetMap:Array<tile>) -> Array<tile>
+	{
+		var updatedMap:Array = targetMap
+		
+		// Collapse Walls
+		var index = 0
+		while( index < targetMap.count ){
+			
+			let currentX:Int = Int(index % Int(tileCountX))
+			let currentY:Int = Int(index / Int(tileCountY))
+			
+			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside && tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.outside && tileAtLocation(updatedMap, x: currentX+2, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX-2, y: currentY) == tile.floor ){
+				updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
+				updatedMap[indexAtLocation(currentX+1, y: currentY)] = tile.floor
+			}
+			
+			index += 1
+		}
+		
+		// Remove spikes
+		index = 0
+		while( index < targetMap.count ){
+			
+			let currentX:Int = Int(index % Int(tileCountX))
+			let currentY:Int = Int(index / Int(tileCountY))
+			
+			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside && tileAtLocation(updatedMap, x: currentX, y: currentY+1) == tile.floor && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.floor ){
+				updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
+			}
+			
+			index += 1
+		}
+		
+		return updatedMap
+	}
+	
+	func fillRooms(targetMap:Array<tile>) -> Array<tile>
 	{
 		var updatedMap:Array = targetMap
 		
@@ -64,32 +202,44 @@ class GameScene: SKScene {
 			let currentX:Int = Int(index % Int(tileCountX))
 			let currentY:Int = Int(index / Int(tileCountY))
 			
-			// Connect close rooms
-			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside ){
-				if( tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX-1, y: currentY) == tile.floor ){
-					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.section
+			// Find a floor block and cover it in focus
+			if( updatedMap[index] == tile.floor ){
+				
+				updatedMap = mapArea(CGRectMake(CGFloat(currentX),CGFloat(currentY),0,0),targetMap: updatedMap,tileType: tile.focus)
+				
+				var completed = 0
+				while( completed < 50 ){
+					var subIndex = 0
+					while( subIndex < updatedMap.count ){
+						let focusX:Int = Int(subIndex % Int(tileCountX))
+						let focusY:Int = Int(subIndex / Int(tileCountY))
+						
+						if( updatedMap[subIndex] == tile.focus && updatedMap[indexAtLocation(focusX+1, y: focusY)] == tile.floor ){
+							updatedMap[indexAtLocation(focusX+1, y: focusY)] = tile.focus
+						}
+						if( updatedMap[subIndex] == tile.focus && updatedMap[indexAtLocation(focusX-1, y: focusY)] == tile.floor ){
+							updatedMap[indexAtLocation(focusX-1, y: focusY)] = tile.focus
+						}
+						if( updatedMap[subIndex] == tile.focus && tileAtLocation(updatedMap, x: focusX, y: focusY+1) == tile.floor ){
+							updatedMap[indexAtLocation(focusX, y: focusY+1)] = tile.focus
+						}
+						if( updatedMap[subIndex] == tile.focus && tileAtLocation(updatedMap, x: focusX, y: focusY-1) == tile.floor ){
+							updatedMap[indexAtLocation(focusX, y: focusY-1)] = tile.focus
+						}
+						subIndex += 1
+					}
+					completed += 1
 				}
-				if( tileAtLocation(updatedMap, x: currentX, y: currentY+1) == tile.floor && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.floor ){
-					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.section
-				}
+				break
 			}
-			// Expand to the edges
-			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside ){
-				if( tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX-1, y: currentY) == tile.floor ){
-					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.section
-				}
-				if( tileAtLocation(updatedMap, x: currentX, y: currentY+1) == tile.floor && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.floor ){
-					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.section
-				}
-			}
-			
 			index += 1
 		}
 		
 		return updatedMap
 	}
 	
-	func makeRooms(targetMap:Array<tile>) -> Array<tile>
+	
+	func makePathways(targetMap:Array<tile>) -> Array<tile>
 	{
 		var updatedMap:Array = targetMap
 		
@@ -119,6 +269,47 @@ class GameScene: SKScene {
 		return updatedMap
 	}
 	
+	func bleedPathways(targetMap:Array<tile>) -> Array<tile>
+	{
+		var updatedMap:Array = targetMap
+		
+		var index = 0
+		while( index < targetMap.count ){
+			
+			let currentX:Int = Int(index % Int(tileCountX))
+			let currentY:Int = Int(index / Int(tileCountY))
+			
+			// Connect close rooms
+			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside ){
+				if( tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX-1, y: currentY) == tile.floor ){
+					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
+				}
+				if( tileAtLocation(updatedMap, x: currentX, y: currentY+1) == tile.floor && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.floor ){
+					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
+				}
+			}
+			// Expand to the edges
+			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside ){
+				if( tileAtLocation(updatedMap, x: currentX+3, y: currentY) == tile.limit && currentX == Int(tileCountX) - 2 && tileAtLocation(updatedMap, x: currentX-1, y: currentY) == tile.floor ){
+					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
+				}
+				if( tileAtLocation(updatedMap, x: currentX-3, y: currentY) == tile.limit && currentX == 1 && tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.floor ){
+					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
+				}
+				if( tileAtLocation(updatedMap, x: currentX, y: currentY+3) == tile.limit && currentY == Int(tileCountY) - 2 && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.floor ){
+					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
+				}
+				if( tileAtLocation(updatedMap, x: currentX, y: currentY-3) == tile.limit && currentY == 1 && tileAtLocation(updatedMap, x: currentX, y: currentY+1) == tile.floor ){
+					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
+				}
+			}
+			
+			index += 1
+		}
+		
+		return updatedMap
+	}
+
 	func locateTileType(section:CGRect, targetMap:Array<tile>, tileType:tile) -> CGPoint?
 	{
 		var index = 0
@@ -155,7 +346,7 @@ class GameScene: SKScene {
 			let currentX:Int = Int(index % Int(tileCountX))
 			let currentY:Int = Int(index / Int(tileCountY))
 			
-			if( currentX >= originX && currentX <= limitX && currentY >= originY && currentY <= limitY ){ updatedMap[index] = tile.floor }
+			if( currentX >= originX && currentX <= limitX && currentY >= originY && currentY <= limitY ){ updatedMap[index] = tileType }
 			
 			index += 1
 		}
@@ -180,8 +371,20 @@ class GameScene: SKScene {
 					sprite.color = UIColor.blackColor()
 				}
 				else if( testArray[lookup] == tile.section ){
-						sprite.color = UIColor.redColor()
-					}
+					sprite.color = UIColor.redColor()
+				}
+				else if( testArray[lookup] == tile.focus ){
+					sprite.color = UIColor.cyanColor()
+				}
+				else if( testArray[lookup] == tile.room ){
+					sprite.color = UIColor.blueColor()
+				}
+				else if( testArray[lookup] == tile.roomCenter ){
+					sprite.color = UIColor.yellowColor()
+				}
+				else if( testArray[lookup] == tile.roomConnected ){
+					sprite.color = UIColor.blueColor()
+				}
 				else{
 					sprite.color = UIColor.whiteColor()
 				}
@@ -196,6 +399,11 @@ class GameScene: SKScene {
 	func tileAtLocation(targetMap:Array<tile>,x:Int,y:Int) -> tile
 	{
 		let index = indexAtLocation(x,y: y)
+		
+		if( x < 0 ){ return tile.limit }
+		if( x > Int(tileCountX) ){ return tile.limit }
+		if( y < 0 ){ return tile.limit }
+		if(y > Int(tileCountY) ){ return tile.limit }
 		
 		if ( index >= 0 && index <= Int(tileCountX) * Int(tileCountY) ){
 			return targetMap[index]
