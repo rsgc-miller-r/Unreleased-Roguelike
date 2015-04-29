@@ -18,6 +18,7 @@ enum tile:UInt32 {
 	case roomConnected = 7
 	case spawn = 8
 	case exit = 9
+	case pickup = 10
 	case limit = 99
 }
 
@@ -30,10 +31,10 @@ class GameScene: SKScene {
     override func didMoveToView(view: SKView)
 	{
 		tileSize = self.frame.size.width/CGFloat(tileCountX)
-		createWorld()
+		drawStage()
     }
 	
-	func createWorld()
+	func drawStage()
 	{
 		let testArray = Stage().generate()
 		
@@ -68,7 +69,7 @@ class GameScene: SKScene {
 				else if( testArray[lookup] == tile.exit ){
 					sprite.color = UIColor.greenColor()
 				}
-				else if( testArray[lookup] == tile.roomConnected ){
+				else if( testArray[lookup] == tile.pickup ){
 					sprite.color = UIColor.blueColor()
 				}
 				else{
@@ -81,8 +82,6 @@ class GameScene: SKScene {
 			x += 1
 		}
 	}
-	
-	
 	
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent)
 	{
