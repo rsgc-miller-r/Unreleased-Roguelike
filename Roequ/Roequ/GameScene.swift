@@ -143,10 +143,22 @@ class GameScene: SKScene {
             let location = touch.locationInNode(self)
 			println("touched:\(location.x) \(location.y)")
 			
-			if location.y > 300 { player.move(0, yUpdate: 1) }
-			else if location.y < 0   { player.move(0, yUpdate: -1) }
-			else if location.x < 160   { player.move(-1, yUpdate: 0) }
-			else { player.move(1, yUpdate: 0) }
+			var xMod = 0
+			var yMod = 0
+			
+			if location.y > 270 { yMod = 1 }
+			else if location.y < 50   { yMod = -1 }
+			else if location.x < 160   { xMod = -1 }
+			else { xMod = 1 }
+			
+			var destination = currentStage.tileAtLocation(player.x + xMod, y: player.y + yMod - 1)
+			
+			if destination == tile.outside {
+			
+			}
+			else{
+				player.move(xMod, yUpdate: yMod)
+			}
 			
 			turn()
         }

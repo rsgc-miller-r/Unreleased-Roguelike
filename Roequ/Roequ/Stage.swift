@@ -78,8 +78,8 @@ class Stage
 			
 			let posX = CGFloat(arc4random_uniform(UInt32(tileCountX)))
 			let posY = CGFloat(arc4random_uniform(UInt32(tileCountY)))
-			let width = CGFloat(arc4random_uniform(8)) + 1
-			let height = CGFloat(arc4random_uniform(8)) + 1
+			let width = CGFloat(arc4random_uniform(10)) + 1
+			let height = CGFloat(arc4random_uniform(10)) + 1
 			
 			// Don't create on edges
 			if( posX == 0 ){ continue }
