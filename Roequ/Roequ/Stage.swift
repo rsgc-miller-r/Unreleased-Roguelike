@@ -10,32 +10,32 @@ import Foundation
 import SpriteKit
 
 class Stage
-{	
-	init( )
+{
+	var activeStage:Array<tile> = []
+	
+	init()
 	{
-		
+		generate()
 	}
 	
-	func generate() -> Array<tile>
+	func generate()
 	{
-		var updatedMap:Array = [tile.outside]
 		
-		var x:CGFloat = 0
-		while( x < tileCountX * tileCountY ){
-			updatedMap.append(tile.outside)
-			x += 1
-		}
+		generateBlankStage()
+		generatePathways()
+		generatePathwaysBleed()
+		generateRoomsBleed()
+		generateRoomsFill()
+		generateRoomsTrim()
 		
-		updatedMap = makePathways(updatedMap)
-		updatedMap = bleedPathways(updatedMap)
-		updatedMap = bleedRooms(updatedMap)
-		updatedMap = fillRooms(updatedMap)
-		updatedMap = trimRooms(updatedMap)
-		updatedMap = removeFocus(updatedMap)
-		updatedMap = addSpawn(updatedMap)
-		updatedMap = addExit(updatedMap)
-		updatedMap = addWalls(updatedMap)
-		updatedMap = addExtras(updatedMap)
+		removeFocus()
+		
+		addSpawn()
+		addExit()
+		addWalls()
+		addPickup()
+		
+		/*
 		
 		// Level size
 		var index = 0
@@ -54,17 +54,202 @@ class Stage
 		if (find(updatedMap, tile.pickup) == nil) {
 			updatedMap = generate()
 		}
-		
-		return updatedMap
+*/
+
 	}
 	
-	func addWalls(targetMap:Array<tile>) -> Array<tile>
+	func generateBlankStage()
 	{
-		var updatedMap:Array = targetMap
+		var updatedMap:Array = [tile.outside]
+		
+		var x:CGFloat = 0
+		while( x < tileCountX * tileCountY ){
+			updatedMap.append(tile.outside)
+			x += 1
+		}
+		
+		return activeStage = updatedMap
+	}
+	
+	func generatePathways()
+	{
+		var updatedMap:Array = activeStage
+		
+		// Make the rooms
+		var i:Int = 0
+		while( i < 10000){
+			
+			let posX = CGFloat(arc4random_uniform(UInt32(tileCountX)))
+			let posY = CGFloat(arc4random_uniform(UInt32(tileCountY)))
+			let width = CGFloat(arc4random_uniform(10)) + 2
+			let height = CGFloat(arc4random_uniform(10)) + 2
+			
+			// Don't create on edges
+			if( posX == 0 ){ continue }
+			if( posY == 0 ){ continue }
+			if( posY + height >= tileCountY - 1 ){ continue }
+			if( posX + width >= tileCountX - 1 ){ continue }
+			
+			let check = locateTileType(CGRectMake(posX-1,posY-1,width+2,height+2), targetMap: updatedMap, tileType: tile.floor)
+			
+			if check == nil {
+				updatedMap = mapArea(CGRectMake(posX,posY,width,height),targetMap: updatedMap,tileType: tile.floor)
+			}
+			i += 1
+		}
+		
+		activeStage = updatedMap
+	}
+	
+	func generatePathwaysBleed()
+	{
+		var updatedMap:Array = activeStage
+		
+		var index = 0
+		while( index < updatedMap.count ){
+			
+			let currentX:Int = Int(index % Int(tileCountX))
+			let currentY:Int = Int(index / Int(tileCountY))
+			
+			// Connect close rooms
+			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside ){
+				if( tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX-1, y: currentY) == tile.floor ){
+					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
+				}
+				if( tileAtLocation(updatedMap, x: currentX, y: currentY+1) == tile.floor && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.floor ){
+					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
+				}
+			}
+			// Expand to the edges
+			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside ){
+				if( tileAtLocation(updatedMap, x: currentX+3, y: currentY) == tile.limit && currentX == Int(tileCountX) - 2 && tileAtLocation(updatedMap, x: currentX-1, y: currentY) == tile.floor ){
+					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
+				}
+				if( tileAtLocation(updatedMap, x: currentX-3, y: currentY) == tile.limit && currentX == 1 && tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.floor ){
+					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
+				}
+				if( tileAtLocation(updatedMap, x: currentX, y: currentY+3) == tile.limit && currentY == Int(tileCountY) - 2 && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.floor ){
+					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
+				}
+				if( tileAtLocation(updatedMap, x: currentX, y: currentY-3) == tile.limit && currentY == 1 && tileAtLocation(updatedMap, x: currentX, y: currentY+1) == tile.floor ){
+					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
+				}
+			}
+			
+			index += 1
+		}
+		
+		activeStage = updatedMap
+	}
+	
+	func generateRoomsBleed()
+	{
+		var updatedMap:Array = activeStage
 		
 		// Collapse Walls
 		var index = 0
-		while( index < targetMap.count ){
+		while( index < updatedMap.count ){
+			
+			let currentX:Int = Int(index % Int(tileCountX))
+			let currentY:Int = Int(index / Int(tileCountY))
+			
+			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside && tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.outside && tileAtLocation(updatedMap, x: currentX+2, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX-2, y: currentY) == tile.floor ){
+				updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
+				updatedMap[indexAtLocation(currentX+1, y: currentY)] = tile.floor
+			}
+			
+			index += 1
+		}
+		
+		// Remove spikes
+		index = 0
+		while( index < updatedMap.count ){
+			
+			let currentX:Int = Int(index % Int(tileCountX))
+			let currentY:Int = Int(index / Int(tileCountY))
+			
+			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside && tileAtLocation(updatedMap, x: currentX, y: currentY+1) == tile.floor && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.floor ){
+				updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
+			}
+			
+			index += 1
+		}
+		
+		activeStage = updatedMap
+	}
+	
+	func generateRoomsFill()
+	{
+		var updatedMap:Array = activeStage
+		
+		var index = 0
+		while( index < updatedMap.count ){
+			
+			let currentX:Int = Int(index % Int(tileCountX))
+			let currentY:Int = Int(index / Int(tileCountY))
+			
+			// Find a floor block and cover it in focus
+			if( updatedMap[index] == tile.floor ){
+				
+				updatedMap = mapArea(CGRectMake(CGFloat(currentX),CGFloat(currentY),0,0),targetMap: updatedMap,tileType: tile.focus)
+				
+				var completed = 0
+				while( completed < 50 ){
+					var subIndex = 0
+					while( subIndex < updatedMap.count ){
+						let focusX:Int = Int(subIndex % Int(tileCountX))
+						let focusY:Int = Int(subIndex / Int(tileCountY))
+						
+						if( updatedMap[subIndex] == tile.focus && updatedMap[indexAtLocation(focusX+1, y: focusY)] == tile.floor ){
+							updatedMap[indexAtLocation(focusX+1, y: focusY)] = tile.focus
+						}
+						if( updatedMap[subIndex] == tile.focus && updatedMap[indexAtLocation(focusX-1, y: focusY)] == tile.floor ){
+							updatedMap[indexAtLocation(focusX-1, y: focusY)] = tile.focus
+						}
+						if( updatedMap[subIndex] == tile.focus && tileAtLocation(updatedMap, x: focusX, y: focusY+1) == tile.floor ){
+							updatedMap[indexAtLocation(focusX, y: focusY+1)] = tile.focus
+						}
+						if( updatedMap[subIndex] == tile.focus && tileAtLocation(updatedMap, x: focusX, y: focusY-1) == tile.floor ){
+							updatedMap[indexAtLocation(focusX, y: focusY-1)] = tile.focus
+						}
+						subIndex += 1
+					}
+					completed += 1
+				}
+				break
+			}
+			index += 1
+		}
+		
+		activeStage = updatedMap
+	}
+	
+	func generateRoomsTrim()
+	{
+		var updatedMap:Array = activeStage
+		
+		// Collapse Walls
+		var index = 0
+		while( index < updatedMap.count ){
+			
+			if updatedMap[index] == tile.floor {
+				updatedMap[index] = tile.outside
+			}
+			
+			index += 1
+		}
+		
+		activeStage = updatedMap
+	}
+	
+	
+	func addWalls()
+	{
+		var updatedMap:Array = activeStage
+		
+		// Collapse Walls
+		var index = 0
+		while( index < updatedMap.count ){
 			
 			let currentX:Int = Int(index % Int(tileCountX))
 			let currentY:Int = Int(index / Int(tileCountY))
@@ -85,12 +270,12 @@ class Stage
 			
 			index += 1
 		}
-		return updatedMap
+		activeStage = updatedMap
 	}
 	
-	func addExit(targetMap:Array<tile>) -> Array<tile>
+	func addExit()
 	{
-		var updatedMap:Array = targetMap
+		var updatedMap:Array = activeStage
 		
 		var exitX:Int = 0
 		var exitY:Int = 0
@@ -104,7 +289,7 @@ class Stage
 		
 		// Collapse Walls
 		var index = 0
-		while( index < targetMap.count ){
+		while( index < updatedMap.count ){
 			
 			let currentX:Int = Int(index % Int(tileCountX))
 			let currentY:Int = Int(index / Int(tileCountY))
@@ -122,13 +307,12 @@ class Stage
 		
 		updatedMap[indexAtLocation(exitX, y: exitY)] = tile.exit
 		println("Distance: \(furthestDistance) \(exitX) - \(exitY)")
-		return updatedMap
+		activeStage = updatedMap
 	}
 	
-	func addSpawn(targetMap:Array<tile>) -> Array<tile>
+	func addSpawn()
 	{
-		
-		var updatedMap:Array = targetMap
+		var updatedMap:Array = activeStage
 		
 		// Collapse Walls
 		var spawnCreated = 0
@@ -144,16 +328,16 @@ class Stage
 			}
 		}
 		
-		return updatedMap
+		activeStage = updatedMap
 	}
 	
-	func addExtras(targetMap:Array<tile>) -> Array<tile>
+	func addPickup()
 	{
-		var updatedMap:Array = targetMap
+		var updatedMap:Array = activeStage
 		
 		// Collapse Walls
 		var index = 0
-		while( index < targetMap.count ){
+		while( index < updatedMap.count ){
 			
 			let currentX:Int = Int(index % Int(tileCountX))
 			let currentY:Int = Int(index / Int(tileCountY))
@@ -193,197 +377,21 @@ class Stage
 			
 			index += 1
 		}
-		return updatedMap
+		activeStage = updatedMap
 	}
 	
-	
-	func removeFocus(targetMap:Array<tile>) -> Array<tile>
+	func removeFocus()
 	{
-		var updatedMap:Array = targetMap
-		
-		// Collapse Walls
+		var updatedMap:Array = activeStage
 		var index = 0
-		while( index < targetMap.count ){
+		while( index < updatedMap.count ){
 			
 			if updatedMap[index] == tile.focus {
 				updatedMap[index] = tile.floor
 			}
 			index += 1
 		}
-		
-		return updatedMap
-	}
-	
-	func trimRooms(targetMap:Array<tile>) -> Array<tile>
-	{
-		var updatedMap:Array = targetMap
-		
-		// Collapse Walls
-		var index = 0
-		while( index < targetMap.count ){
-			
-			if updatedMap[index] == tile.floor {
-				updatedMap[index] = tile.outside
-			}
-			
-			index += 1
-		}
-		
-		return updatedMap
-	}
-	
-	func bleedRooms(targetMap:Array<tile>) -> Array<tile>
-	{
-		var updatedMap:Array = targetMap
-		
-		// Collapse Walls
-		var index = 0
-		while( index < targetMap.count ){
-			
-			let currentX:Int = Int(index % Int(tileCountX))
-			let currentY:Int = Int(index / Int(tileCountY))
-			
-			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside && tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.outside && tileAtLocation(updatedMap, x: currentX+2, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX-2, y: currentY) == tile.floor ){
-				updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
-				updatedMap[indexAtLocation(currentX+1, y: currentY)] = tile.floor
-			}
-			
-			index += 1
-		}
-		
-		// Remove spikes
-		index = 0
-		while( index < targetMap.count ){
-			
-			let currentX:Int = Int(index % Int(tileCountX))
-			let currentY:Int = Int(index / Int(tileCountY))
-			
-			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside && tileAtLocation(updatedMap, x: currentX, y: currentY+1) == tile.floor && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.floor ){
-				updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
-			}
-			
-			index += 1
-		}
-		
-		return updatedMap
-	}
-	
-	func fillRooms(targetMap:Array<tile>) -> Array<tile>
-	{
-		var updatedMap:Array = targetMap
-		
-		var index = 0
-		while( index < targetMap.count ){
-			
-			let currentX:Int = Int(index % Int(tileCountX))
-			let currentY:Int = Int(index / Int(tileCountY))
-			
-			// Find a floor block and cover it in focus
-			if( updatedMap[index] == tile.floor ){
-				
-				updatedMap = mapArea(CGRectMake(CGFloat(currentX),CGFloat(currentY),0,0),targetMap: updatedMap,tileType: tile.focus)
-				
-				var completed = 0
-				while( completed < 50 ){
-					var subIndex = 0
-					while( subIndex < updatedMap.count ){
-						let focusX:Int = Int(subIndex % Int(tileCountX))
-						let focusY:Int = Int(subIndex / Int(tileCountY))
-						
-						if( updatedMap[subIndex] == tile.focus && updatedMap[indexAtLocation(focusX+1, y: focusY)] == tile.floor ){
-							updatedMap[indexAtLocation(focusX+1, y: focusY)] = tile.focus
-						}
-						if( updatedMap[subIndex] == tile.focus && updatedMap[indexAtLocation(focusX-1, y: focusY)] == tile.floor ){
-							updatedMap[indexAtLocation(focusX-1, y: focusY)] = tile.focus
-						}
-						if( updatedMap[subIndex] == tile.focus && tileAtLocation(updatedMap, x: focusX, y: focusY+1) == tile.floor ){
-							updatedMap[indexAtLocation(focusX, y: focusY+1)] = tile.focus
-						}
-						if( updatedMap[subIndex] == tile.focus && tileAtLocation(updatedMap, x: focusX, y: focusY-1) == tile.floor ){
-							updatedMap[indexAtLocation(focusX, y: focusY-1)] = tile.focus
-						}
-						subIndex += 1
-					}
-					completed += 1
-				}
-				break
-			}
-			index += 1
-		}
-		
-		return updatedMap
-	}
-	
-	
-	func makePathways(targetMap:Array<tile>) -> Array<tile>
-	{
-		var updatedMap:Array = targetMap
-		
-		// Make the rooms
-		var i:Int = 0
-		while( i < 10000){
-			
-			let posX = CGFloat(arc4random_uniform(UInt32(tileCountX)))
-			let posY = CGFloat(arc4random_uniform(UInt32(tileCountY)))
-			let width = CGFloat(arc4random_uniform(10)) + 2
-			let height = CGFloat(arc4random_uniform(10)) + 2
-			
-			// Don't create on edges
-			if( posX == 0 ){ continue }
-			if( posY == 0 ){ continue }
-			if( posY + height >= tileCountY - 1 ){ continue }
-			if( posX + width >= tileCountX - 1 ){ continue }
-			
-			let check = locateTileType(CGRectMake(posX-1,posY-1,width+2,height+2), targetMap: updatedMap, tileType: tile.floor)
-			
-			if check == nil {
-				updatedMap = mapArea(CGRectMake(posX,posY,width,height),targetMap: updatedMap,tileType: tile.floor)
-			}
-			i += 1
-		}
-		
-		return updatedMap
-	}
-	
-	func bleedPathways(targetMap:Array<tile>) -> Array<tile>
-	{
-		var updatedMap:Array = targetMap
-		
-		var index = 0
-		while( index < targetMap.count ){
-			
-			let currentX:Int = Int(index % Int(tileCountX))
-			let currentY:Int = Int(index / Int(tileCountY))
-			
-			// Connect close rooms
-			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside ){
-				if( tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX-1, y: currentY) == tile.floor ){
-					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
-				}
-				if( tileAtLocation(updatedMap, x: currentX, y: currentY+1) == tile.floor && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.floor ){
-					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
-				}
-			}
-			// Expand to the edges
-			if( tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.outside ){
-				if( tileAtLocation(updatedMap, x: currentX+3, y: currentY) == tile.limit && currentX == Int(tileCountX) - 2 && tileAtLocation(updatedMap, x: currentX-1, y: currentY) == tile.floor ){
-					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
-				}
-				if( tileAtLocation(updatedMap, x: currentX-3, y: currentY) == tile.limit && currentX == 1 && tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.floor ){
-					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
-				}
-				if( tileAtLocation(updatedMap, x: currentX, y: currentY+3) == tile.limit && currentY == Int(tileCountY) - 2 && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.floor ){
-					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
-				}
-				if( tileAtLocation(updatedMap, x: currentX, y: currentY-3) == tile.limit && currentY == 1 && tileAtLocation(updatedMap, x: currentX, y: currentY+1) == tile.floor ){
-					updatedMap[indexAtLocation(currentX, y: currentY)] = tile.floor
-				}
-			}
-			
-			index += 1
-		}
-		
-		return updatedMap
+		activeStage = updatedMap
 	}
 	
 	func locateTileType(section:CGRect, targetMap:Array<tile>, tileType:tile) -> CGPoint?

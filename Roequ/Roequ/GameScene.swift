@@ -35,9 +35,9 @@ class GameScene: SKScene {
 		
 		
 		
-		drawView()
+//		drawView()
 		
-//		drawStage()
+		drawStage()
     }
 	
 	func drawView()
@@ -45,17 +45,15 @@ class GameScene: SKScene {
 		let viewScale:CGFloat = 3
 		let tileSize = self.frame.size.width/CGFloat(tileCountX/viewScale)
 		let offset:CGFloat = (tileSize/2)
-		let testArray = Stage().generate()
+		let testArray: () = Stage().generate()
 		
 		let horizontalTiles = tileCountX/viewScale
 		let verticalTiles = tileCountY/viewScale
 		
 		// Look at spawn
-		let spawnIndex = find(testArray, tile.spawn)
-		let spawnX:Int = Int(spawnIndex! % Int(tileCountX))
-		let spawnY:Int = Int(spawnIndex! / Int(tileCountY))
-		
-		println("Draw:\(horizontalTiles) x \(verticalTiles)")
+//		let spawnIndex = find(testArray, tile.spawn)
+//		let spawnX:Int = Int(spawnIndex! % Int(tileCountX))
+//		let spawnY:Int = Int(spawnIndex! / Int(tileCountY))
 		
 		
 		var x = 0
@@ -76,8 +74,7 @@ class GameScene: SKScene {
 				else{
 					sprite.color = UIColor.redColor()
 				}
-				
-				println("Draw Tile #\(x) #\(y)")
+	
 				self.addChild(sprite)
 				y += 1
 			}
@@ -88,7 +85,7 @@ class GameScene: SKScene {
 	
 	func drawStage()
 	{
-		let testArray = Stage().generate()
+		let testArray = Stage().activeStage
 		
 		let offset:CGFloat = (tileSize/2)
 		

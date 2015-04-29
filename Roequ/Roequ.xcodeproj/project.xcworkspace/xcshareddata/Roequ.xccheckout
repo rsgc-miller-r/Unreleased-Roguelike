@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>C29D2B0C-537A-4D53-9972-A43B86F30625</string>
 	<key>IDESourceControlProjectName</key>
-	<string>project</string>
+	<string>Roequ</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>DCE41B63D43616F3B88105B03EFFC9C56B328DE2</key>
 		<string>https://github.com/aliceffekt/roequ.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>Roequ/Roequ.xcodeproj/project.xcworkspace</string>
+	<string>Roequ/Roequ.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>DCE41B63D43616F3B88105B03EFFC9C56B328DE2</key>
