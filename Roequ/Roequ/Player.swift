@@ -27,4 +27,10 @@ class Player
 	{
 		
 	}
+	
+	func move(xUpdate:Int,yUpdate:Int)
+	{
+		x += xUpdate
+		y += yUpdate
+	}
 }

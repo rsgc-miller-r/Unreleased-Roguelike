@@ -136,8 +136,22 @@ class GameScene: SKScene {
 	{
         for touch in (touches as! Set<UITouch>) {
             let location = touch.locationInNode(self)
+			println("touched:\(location.x) \(location.y)")
+			
+			if location.y > 300 { player.move(0, yUpdate: 1) }
+			else if location.y < 0   { player.move(0, yUpdate: -1) }
+			else if location.x < 160   { player.move(-1, yUpdate: 0) }
+			else { player.move(1, yUpdate: 0) }
+			
+			turn()
         }
     }
+	
+	func turn()
+	{
+		self.removeAllChildren()
+		gameView()
+	}
    
     override func update(currentTime: CFTimeInterval) {
 		
