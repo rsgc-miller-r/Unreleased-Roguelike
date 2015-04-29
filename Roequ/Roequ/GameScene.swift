@@ -22,8 +22,8 @@ enum tile:UInt32 {
 	case limit = 99
 }
 
-let tileCountX:CGFloat = 39
-let tileCountY:CGFloat = 39
+let tileCountX:CGFloat = 45
+let tileCountY:CGFloat = 45
 var tileSize:CGFloat = 0
 var currentStage:Stage = Stage()
 
@@ -35,9 +35,9 @@ class GameScene: SKScene {
 		
 		
 		
-//		drawView()
+		drawView()
 		
-		drawStage()
+//		drawStage()
     }
 	
 	func drawView()
@@ -45,16 +45,10 @@ class GameScene: SKScene {
 		let viewScale:CGFloat = 3
 		let tileSize = self.frame.size.width/CGFloat(tileCountX/viewScale)
 		let offset:CGFloat = (tileSize/2)
-		let testArray: () = Stage().generate()
+		let stage = Stage().activeStage
 		
 		let horizontalTiles = tileCountX/viewScale
 		let verticalTiles = tileCountY/viewScale
-		
-		// Look at spawn
-//		let spawnIndex = find(testArray, tile.spawn)
-//		let spawnX:Int = Int(spawnIndex! % Int(tileCountX))
-//		let spawnY:Int = Int(spawnIndex! / Int(tileCountY))
-		
 		
 		var x = 0
 		while x < Int(horizontalTiles) {
@@ -65,15 +59,20 @@ class GameScene: SKScene {
 				let sprite = SKSpriteNode(color: UIColor.redColor(), size: CGSize(width: tileSize, height: tileSize))
 				sprite.position = CGPoint(x: CGFloat(x) * tileSize + offset, y: CGFloat(y) * tileSize + offset)
 				
-//				let tile = currentStage.tileAtLocation(x: x, y: y)
+				let horizontalOffset = Int(currentStage.spawn.x) - Int(horizontalTiles/2)
+				let verticalOffset = Int(currentStage.spawn.y) - Int(verticalTiles/2) - 1
 				
+				let targetTile = currentStage.tileAtLocation(x + horizontalOffset, y: y + verticalOffset )
 				
-				if x % 2 == 0 {
-					sprite.color = UIColor.whiteColor()
-				}
-				else{
-					sprite.color = UIColor.redColor()
-				}
+				if( targetTile == tile.outside ){ sprite.color = UIColor.blackColor() }
+				else if( targetTile == tile.section ){ sprite.color = UIColor.redColor() }
+				else if( targetTile == tile.focus ){ sprite.color = UIColor.cyanColor() }
+				else if( targetTile == tile.floor ){ sprite.color = UIColor.whiteColor() }
+				else if( targetTile == tile.roomCenter ){ sprite.color = UIColor.yellowColor() }
+				else if( targetTile == tile.spawn ){ sprite.color = UIColor.yellowColor() }
+				else if( targetTile == tile.exit ){ sprite.color = UIColor.greenColor()	}
+				else if( targetTile == tile.pickup ){ sprite.color = UIColor.blueColor() }
+				else{ sprite.color = UIColor.cyanColor() }
 	
 				self.addChild(sprite)
 				y += 1

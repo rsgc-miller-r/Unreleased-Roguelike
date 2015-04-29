@@ -12,6 +12,7 @@ import SpriteKit
 class Stage
 {
 	var activeStage:Array<tile> = []
+	var spawn:CGPoint = CGPoint()
 	
 	init()
 	{
@@ -20,7 +21,6 @@ class Stage
 	
 	func generate()
 	{
-		
 		generateBlankStage()
 		generatePathways()
 		generatePathwaysBleed()
@@ -35,27 +35,12 @@ class Stage
 		addWalls()
 		addPickup()
 		
-		/*
-		
-		// Level size
-		var index = 0
-		var mapSize = 0
-		while( index < updatedMap.count ){
-			if( updatedMap[index] == tile.floor ){
-				mapSize += 1
-			}
-			index += 1
+		if( stageSize() < 200 ){
+			generate()
 		}
-		println(mapSize)
-		
-		if( mapSize < 200 ){
-			updatedMap = generate()
+		if (find(activeStage, tile.pickup) == nil) {
+			generate()
 		}
-		if (find(updatedMap, tile.pickup) == nil) {
-			updatedMap = generate()
-		}
-*/
-
 	}
 	
 	func generateBlankStage()
@@ -325,10 +310,10 @@ class Stage
 			
 			if tileAtLocation(  currentX, y: currentY) == tile.floor && tileAtLocation(  currentX-1, y: currentY) == tile.floor && tileAtLocation(  currentX+1, y: currentY) == tile.floor && tileAtLocation(  currentX, y: currentY-1) == tile.outside && tileAtLocation(  currentX+1, y: currentY-1) == tile.outside && tileAtLocation(  currentX-1, y: currentY-1) == tile.outside {
 				updatedMap[indexAtLocation(currentX, y: currentY-1)] = tile.spawn
+				spawn = CGPoint(x: currentX, y: currentY)
 				spawnCreated = 1
 			}
 		}
-		
 		activeStage = updatedMap
 	}
 	
@@ -460,5 +445,19 @@ class Stage
 	func indexAtLocation( x:Int,y:Int ) -> Int
 	{
 		return (y * Int(tileCountX)) + x
+	}
+	
+	func stageSize() -> Int
+	{
+		var index = 0
+		var mapSize = 0
+		while( index < activeStage.count ){
+			if( activeStage[index] == tile.floor ){
+				mapSize += 1
+			}
+			index += 1
+		}
+		return mapSize
+
 	}
 }
