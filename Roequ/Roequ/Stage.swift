@@ -51,6 +51,9 @@ class Stage
 		if( mapSize < 200 ){
 			updatedMap = generate()
 		}
+		if (find(updatedMap, tile.pickup) == nil) {
+			updatedMap = generate()
+		}
 		
 		return updatedMap
 	}
@@ -135,7 +138,7 @@ class Stage
 			let currentX:Int = Int(randomIndex % Int(tileCountX))
 			let currentY:Int = Int(randomIndex / Int(tileCountY))
 			
-			if tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX-1, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.outside {
+			if tileAtLocation(updatedMap, x: currentX, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX-1, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX+1, y: currentY) == tile.floor && tileAtLocation(updatedMap, x: currentX, y: currentY-1) == tile.outside && tileAtLocation(updatedMap, x: currentX+1, y: currentY-1) == tile.outside && tileAtLocation(updatedMap, x: currentX-1, y: currentY-1) == tile.outside {
 				updatedMap[indexAtLocation(currentX, y: currentY-1)] = tile.spawn
 				spawnCreated = 1
 			}
