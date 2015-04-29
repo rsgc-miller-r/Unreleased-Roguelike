@@ -74,7 +74,12 @@ class GameScene: SKScene {
 				else if( targetTile == tile.exit ){ sprite.color = UIColor.greenColor()	}
 				else if( targetTile == tile.pickup ){ sprite.color = UIColor.blueColor() }
 				else{ sprite.color = UIColor.cyanColor() }
-	
+				
+				// Add Player
+				if x == Int(horizontalTiles/2) && y == Int(verticalTiles/2) {
+					sprite.color = UIColor.purpleColor()
+				}
+				
 				self.addChild(sprite)
 				y += 1
 			}
