@@ -83,6 +83,12 @@ class GameScene: SKScene {
 				else if( targetTile == tile.section ){ spriteSection(context, index: currentIndex, position: currentPosition) }
 				else if( targetTile == tile.limit ){ spriteLimit(context, index: currentIndex, position: currentPosition) }
 				else if( targetTile == tile.wall ){ spriteWall(context, index: currentIndex, position: currentPosition) }
+				else if( targetTile == tile.floor ){ spriteFloor(context, index: currentIndex, position: currentPosition) }
+				else if( targetTile == tile.outside ){ spriteOutside(context, index: currentIndex, position: currentPosition) }
+				else {
+					println("Missing sprite:\(targetTile.rawValue)")
+					spriteMissing(context, index: currentIndex, position: currentPosition)
+				}
 				
 				y += 1
 			}
@@ -100,6 +106,54 @@ class GameScene: SKScene {
 	}
 	
 	// MARK: Sprites -
+	
+	func spriteMissing(context:CGContextRef, index:Int, position:CGPoint)
+	{
+		let currentX:Int = Int(index % Int(tileCountX))
+		let currentY:Int = Int(index / Int(tileCountY))
+		
+		let center:CGPoint = CGPoint(x: position.x + tileSizeX/2, y: position.y + tileSizeY/2)
+		let color = UIColor.redColor()
+		
+		drawLine(context, origin: CGPoint(x: center.x - tileSizeX/4, y: center.y + tileSizeX/4), destination: CGPoint(x: center.x + tileSizeX/4, y: center.y + tileSizeX/4), color: color )
+		
+	}
+	
+	func spriteOutside(context:CGContextRef, index:Int, position:CGPoint)
+	{
+		let currentX:Int = Int(index % Int(tileCountX))
+		let currentY:Int = Int(index / Int(tileCountY))
+		let color = UIColor(white: 0.2, alpha: 1)
+		
+		let center:CGPoint = CGPoint(x: position.x + tileSizeX/2, y: position.y + tileSizeY/2)
+		
+		if currentStage.tileAtLocation(currentX+1, y: currentY) == tile.outside {
+			drawLine(context, origin: center, destination: CGPoint(x: center.x + tileSizeX/2, y: center.y), color: color )
+		}
+		if currentStage.tileAtLocation(currentX-1, y: currentY) == tile.outside {
+			drawLine(context, origin: center, destination: CGPoint(x: center.x - tileSizeX/2, y: center.y), color: color )
+		}
+		if currentStage.tileAtLocation(currentX, y: currentY+1) == tile.outside {
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + tileSizeX/2), color: color )
+		}
+		if currentStage.tileAtLocation(currentX, y: currentY-1) == tile.outside {
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - tileSizeX/2), color: color )
+		}
+	}
+	
+	func spriteFloor(context:CGContextRef, index:Int, position:CGPoint)
+	{
+		let currentX:Int = Int(index % Int(tileCountX))
+		let currentY:Int = Int(index / Int(tileCountY))
+		
+		let center:CGPoint = CGPoint(x: position.x + tileSizeX/2, y: position.y + tileSizeY/2)
+		
+		drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - 0.1), color: UIColor(white: 0.2, alpha: 1) )
+		drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + 0.1), color: UIColor(white: 0.2, alpha: 1) )
+		drawLine(context, origin: center, destination: CGPoint(x: center.x - 0.1, y: center.y), color: UIColor(white: 0.2, alpha: 1) )
+		drawLine(context, origin: center, destination: CGPoint(x: center.x + 0.1, y: center.y), color: UIColor(white: 0.2, alpha: 1) )
+		
+	}
 	
 	func spritePlayer(context:CGContextRef, index:Int, position:CGPoint)
 	{
@@ -119,12 +173,12 @@ class GameScene: SKScene {
 	{
 		let currentX:Int = Int(index % Int(tileCountX))
 		let currentY:Int = Int(index / Int(tileCountY))
+		let color = UIColor(white: 0.2, alpha: 1)
 		
 		let center:CGPoint = CGPoint(x: position.x + tileSizeX/2, y: position.y + tileSizeY/2)
 		
-		println(index)
-		drawLine(context, origin: CGPoint(x: center.x - tileSizeX/4, y: center.y + tileSizeX/4), destination: CGPoint(x: center.x + tileSizeX/4, y: center.y + tileSizeX/4), color: UIColor.whiteColor() )
-		drawLine(context, origin: CGPoint(x: center.x - tileSizeX/4, y: center.y - tileSizeX/4), destination: CGPoint(x: center.x + tileSizeX/4, y: center.y - tileSizeX/4), color: UIColor.whiteColor() )
+		drawLine(context, origin: CGPoint(x: center.x - tileSizeX/4, y: center.y + tileSizeX/4), destination: CGPoint(x: center.x + tileSizeX/4, y: center.y + tileSizeX/4), color: color )
+		drawLine(context, origin: CGPoint(x: center.x - tileSizeX/4, y: center.y - tileSizeX/4), destination: CGPoint(x: center.x + tileSizeX/4, y: center.y - tileSizeX/4), color: color )
 	}
 	
 	func spriteSection(context:CGContextRef, index:Int, position:CGPoint)
@@ -133,24 +187,25 @@ class GameScene: SKScene {
 		let currentY:Int = Int(index / Int(tileCountY))
 		
 		let center:CGPoint = CGPoint(x: position.x + tileSizeX/2, y: position.y + tileSizeY/2)
+		let color = UIColor(white: 0.2, alpha: 1)
 		
 		if currentStage.tileAtLocation(currentX+1, y: currentY) == tile.section {
-			drawLine(context, origin: center, destination: CGPoint(x: center.x + tileSizeX/4, y: center.y), color: UIColor.whiteColor() )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x + tileSizeX/4, y: center.y), color: color )
 		}
 		if currentStage.tileAtLocation(currentX-1, y: currentY) == tile.section {
-			drawLine(context, origin: center, destination: CGPoint(x: center.x - tileSizeX/4, y: center.y), color: UIColor.whiteColor() )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x - tileSizeX/4, y: center.y), color: color )
 		}
 		if currentStage.tileAtLocation(currentX, y: currentY+1) == tile.section {
-			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + tileSizeX/4), color: UIColor.whiteColor() )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + tileSizeX/4), color: color )
 		}
 		if currentStage.tileAtLocation(currentX, y: currentY-1) == tile.section {
-			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - tileSizeX/4), color: UIColor.whiteColor() )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - tileSizeX/4), color: color )
 		}
 		if currentStage.tileAtLocation(currentX, y: currentY-1) == tile.floor && currentStage.tileAtLocation(currentX, y: currentY+1) == tile.floor && currentStage.tileAtLocation(currentX+1, y: currentY) == tile.floor && currentStage.tileAtLocation(currentX-1, y: currentY) == tile.floor {
-			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - tileSizeX/4), color: UIColor.whiteColor() )
-			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + tileSizeX/4), color: UIColor.whiteColor() )
-			drawLine(context, origin: center, destination: CGPoint(x: center.x - tileSizeX/4, y: center.y), color: UIColor.whiteColor() )
-			drawLine(context, origin: center, destination: CGPoint(x: center.x + tileSizeX/4, y: center.y), color: UIColor.whiteColor() )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - tileSizeX/4), color: color )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + tileSizeX/4), color: color )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x - tileSizeX/4, y: center.y), color: color )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x + tileSizeX/4, y: center.y), color: color )
 		}
 	}
 	
