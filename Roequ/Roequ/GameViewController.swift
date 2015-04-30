@@ -27,6 +27,8 @@ extension SKNode {
 
 class GameViewController: UIViewController
 {
+	var sceneTest:GameScene!
+	
     override func viewDidLoad() {
         super.viewDidLoad()
 		
@@ -35,7 +37,7 @@ class GameViewController: UIViewController
         if let scene = GameScene.unarchiveFromFile("GameScene") as? GameScene {
             // Configure the view.
             let skView = self.view as! SKView
-			
+			sceneTest = scene
 			
             /* Sprite Kit applies additional optimizations to improve rendering performance */
             skView.ignoresSiblingOrder = true
@@ -46,7 +48,7 @@ class GameViewController: UIViewController
 			scene.anchorPoint = CGPoint(x: 0.5, y: 0.5)
 			scene.size = skView.bounds.size
 			scene.backgroundColor = UIColor(white: 0, alpha: 1)
-            
+			
             skView.presentScene(scene)
         }
     }
@@ -74,6 +76,9 @@ class GameViewController: UIViewController
 	
 	@IBAction func fireButton(sender: AnyObject) {
 		println("FIRE")
+		
+		events.addEvent(player.x, y: player.y)
+		sceneTest.newDraw()
 	}
 	
 	
