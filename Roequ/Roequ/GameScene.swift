@@ -13,9 +13,7 @@ enum tile:UInt32 {
 	case floor = 2
 	case section = 3
 	case focus = 4
-	case room = 5
-	case roomCenter = 6
-	case roomConnected = 7
+	case wall = 5
 	case spawn = 8
 	case exit = 9
 	case pickup = 10
@@ -39,8 +37,8 @@ class GameScene: SKScene {
 		currentStage = Stage()
 		player = Player(spawn: currentStage.spawn)
 		
-		gameView()
-//		mapView()
+//		gameView()
+		mapView()
     }
 	
 	func gameView()
@@ -73,7 +71,7 @@ class GameScene: SKScene {
 				else if( targetTile == tile.section ){ sprite.color = UIColor.redColor() }
 				else if( targetTile == tile.focus ){ sprite.color = UIColor.cyanColor() }
 				else if( targetTile == tile.floor ){ sprite.color = UIColor.whiteColor() }
-				else if( targetTile == tile.roomCenter ){ sprite.color = UIColor.yellowColor() }
+				else if( targetTile == tile.wall ){ sprite.color = UIColor.brownColor() }
 				else if( targetTile == tile.spawn ){ sprite.color = UIColor.yellowColor() }
 				else if( targetTile == tile.exit ){ sprite.color = UIColor.greenColor()	}
 				else if( targetTile == tile.pickup ){ sprite.color = UIColor.blueColor() }
@@ -84,7 +82,11 @@ class GameScene: SKScene {
 					sprite.color = UIColor.purpleColor()
 				}
 				
-				self.addChild(sprite)
+				if( targetTile != tile.outside && targetTile != tile.limit ){
+					self.addChild(sprite)
+				}
+				
+				
 				y += 1
 			}
 			x += 1
@@ -115,14 +117,11 @@ class GameScene: SKScene {
 				else if( testArray[lookup] == tile.focus ){
 					sprite.color = UIColor.cyanColor()
 				}
-				else if( testArray[lookup] == tile.room ){
-					sprite.color = UIColor.blueColor()
-				}
-				else if( testArray[lookup] == tile.roomCenter ){
-					sprite.color = UIColor.yellowColor()
-				}
 				else if( testArray[lookup] == tile.spawn ){
 					sprite.color = UIColor.yellowColor()
+				}
+				else if( testArray[lookup] == tile.wall ){
+					sprite.color = UIColor.brownColor()
 				}
 				else if( testArray[lookup] == tile.exit ){
 					sprite.color = UIColor.greenColor()
@@ -157,7 +156,7 @@ class GameScene: SKScene {
 			
 			var destination = currentStage.tileAtLocation(player.x + xMod, y: player.y + yMod - 1)
 			
-			if destination == tile.outside {
+			if destination == tile.outside || destination == tile.wall {
 			
 			}
 			else{

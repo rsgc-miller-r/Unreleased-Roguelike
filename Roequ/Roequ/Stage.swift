@@ -36,6 +36,8 @@ class Stage
 		addWalls()
 		addPickup()
 		
+		convertWalls()
+		
 		if( stageSize() < 150 ){
 			println("!  WORLD | Too small:\(stageSize())")
 			generate()
@@ -380,6 +382,27 @@ class Stage
 				break
 			}
 			
+			index += 1
+		}
+		activeStage = updatedMap
+	}
+	
+	func convertWalls()
+	{
+		var updatedMap:Array = activeStage
+		var index = 0
+		while( index < updatedMap.count ){
+			
+			let currentX:Int = Int(index % Int(tileCountX))
+			let currentY:Int = Int(index / Int(tileCountY))
+			
+			if updatedMap[index] == tile.outside {
+				
+				if locateTileType(CGRectMake(CGFloat(currentX-1),CGFloat(currentY-1),2,2), targetMap: updatedMap, tileType: tile.floor) != nil {
+					updatedMap[index] = tile.wall
+				}
+				
+			}
 			index += 1
 		}
 		activeStage = updatedMap
