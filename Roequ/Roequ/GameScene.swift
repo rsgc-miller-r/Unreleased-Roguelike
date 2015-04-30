@@ -39,7 +39,7 @@ class GameScene: SKScene {
     override func didMoveToView(view: SKView)
 	{
 		tileSizeX = self.frame.size.width/CGFloat(tileCountX)
-		tileSizeY = tileSizeX * 1
+		tileSizeY = tileSizeX * 1.5
 		
 		currentStage = Stage()
 		player = Player(spawn: currentStage.spawn)
@@ -79,18 +79,12 @@ class GameScene: SKScene {
 				
 				if( targetTile == tile.floor ){
 					
-					CGContextAddRect(context, CGRectMake(tileSizeX * CGFloat(x),tileSizeY * CGFloat(y),4,4))
-					CGContextSetFillColorWithColor(context, UIColor.whiteColor().CGColor)
-					CGContextFillPath(context)
 					
 				}
 				else if( targetTile == tile.section ){
+					
 						
-						CGContextAddRect(context, CGRectMake(tileSizeX * CGFloat(x),tileSizeY * CGFloat(y),4,4))
-						CGContextSetFillColorWithColor(context, UIColor.redColor().CGColor)
-						CGContextFillPath(context)
-						
-					}
+				}
 				else if( targetTile == tile.limit ){
 					
 					CGContextAddRect(context, CGRectMake(tileSizeX * CGFloat(x),tileSizeY * CGFloat(y),2,2))
@@ -98,6 +92,7 @@ class GameScene: SKScene {
 					CGContextFillPath(context)
 					
 				}
+				else if( targetTile == tile.wall ){ spriteWall(context, index: currentStage.indexAtLocation(x + horizontalOffset, y: y + verticalOffset), position: CGPoint(x: tileSizeX * CGFloat(x), y: tileSizeY * CGFloat(y) ) ) }
 				
 				// Add Player
 				if x == Int(horizontalTiles/2) && y == Int(verticalTiles/2) {
@@ -122,60 +117,44 @@ class GameScene: SKScene {
 		renderCanvas.texture = texture
 	}
 	
-	func gameView()
+	func spriteWall( context:CGContextRef, index:Int, position:CGPoint)
 	{
-
-		let viewScale:CGFloat = 2
-		let tileSizeX = self.frame.size.width/CGFloat(tileCountX/viewScale)
-		let tileSizeY = tileSizeX * 1.5
-		let offsetX:CGFloat = (tileSizeX/2)
-		let offsetY:CGFloat = (tileSizeY/2)
-		let stage = currentStage.activeStage
+		let currentX:Int = Int(index % Int(tileCountX))
+		let currentY:Int = Int(index / Int(tileCountY))
 		
-		let horizontalTiles = tileCountX/viewScale
-		let verticalTiles = tileCountY/viewScale
+		let center:CGPoint = CGPoint(x: position.x + tileSizeX/2, y: position.y + tileSizeY/2)
 		
-		println("\(tileSizeX) x \(tileSizeY)")
-		
-		var x = 0
-		while x < Int(horizontalTiles) {
-			
-			var y = 0
-			while y < Int(verticalTiles) {
-				
-				let sprite = SKSpriteNode(color: UIColor.redColor(), size: CGSize(width: tileSizeX, height: tileSizeY))
-				sprite.position = CGPoint(x: CGFloat(x) * tileSizeX + offsetX - screenSize.size.width/2, y: CGFloat(y) * tileSizeY + offsetY)
-				
-				let horizontalOffset = player.x - Int(horizontalTiles/2)
-				let verticalOffset = player.y - Int(verticalTiles/2) - 1
-				
-				let targetTile = currentStage.tileAtLocation(x + horizontalOffset, y: y + verticalOffset )
-				
-				if( targetTile == tile.outside ){ sprite.color = UIColor.blackColor() }
-				else if( targetTile == tile.section ){ sprite.color = UIColor.redColor() }
-				else if( targetTile == tile.focus ){ sprite.color = UIColor.cyanColor() }
-				else if( targetTile == tile.floor ){ sprite.color = UIColor.whiteColor() }
-				else if( targetTile == tile.wall ){ sprite.color = UIColor.brownColor() }
-				else if( targetTile == tile.spawn ){ sprite.color = UIColor.yellowColor() }
-				else if( targetTile == tile.exit ){ sprite.color = UIColor.greenColor()	}
-				else if( targetTile == tile.pickup ){ sprite.color = UIColor.blueColor() }
-				else{ sprite.color = UIColor.cyanColor() }
-				
-				// Add Player
-				if x == Int(horizontalTiles/2) && y == Int(verticalTiles/2) {
-					sprite.color = UIColor.purpleColor()
-				}
-				
-				if( targetTile != tile.outside && targetTile != tile.limit ){
-					self.addChild(sprite)
-				}
-				
-				
-				y += 1
-			}
-			x += 1
+		if currentStage.tileAtLocation(currentX+1, y: currentY) == tile.wall {
+			drawLine(context, origin: center, destination: CGPoint(x: center.x + tileSizeX/2, y: center.y), color: UIColor.whiteColor() )
 		}
+		if currentStage.tileAtLocation(currentX-1, y: currentY) == tile.wall {
+			drawLine(context, origin: center, destination: CGPoint(x: center.x - tileSizeX/2, y: center.y), color: UIColor.whiteColor() )
+		}
+		if currentStage.tileAtLocation(currentX, y: currentY+1) == tile.wall {
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + tileSizeX/2), color: UIColor.whiteColor() )
+		}
+		if currentStage.tileAtLocation(currentX, y: currentY-1) == tile.wall {
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - tileSizeX/2), color: UIColor.whiteColor() )
+		}
+		
+		if currentStage.tileAtLocation(currentX, y: currentY-1) == tile.floor && currentStage.tileAtLocation(currentX, y: currentY+1) == tile.floor && currentStage.tileAtLocation(currentX+1, y: currentY) == tile.floor && currentStage.tileAtLocation(currentX-1, y: currentY) == tile.floor {
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - tileSizeX/2), color: UIColor.whiteColor() )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + tileSizeX/2), color: UIColor.whiteColor() )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x - tileSizeX/2, y: center.y), color: UIColor.whiteColor() )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x + tileSizeX/2, y: center.y), color: UIColor.whiteColor() )
+		}
+		
+		
+		
+	}
 	
+	func drawLine(context:CGContextRef,origin:CGPoint,destination:CGPoint,color:UIColor)
+	{
+		CGContextMoveToPoint(context, origin.x,origin.y)
+		CGContextAddLineToPoint(context, destination.x, destination.y)
+		CGContextSetStrokeColorWithColor(context, color.CGColor)
+		CGContextSetLineWidth(context, 1)
+		CGContextStrokePath(context)
 	}
 	
 	func mapView()
