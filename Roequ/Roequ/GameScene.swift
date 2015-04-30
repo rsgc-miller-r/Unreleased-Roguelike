@@ -337,6 +337,13 @@ class GameScene: SKScene {
 	{
 		println("-   TURN | Normal")
 
+		
+		for (index, event) in enumerate(events.activeEvents) {
+			if event.type == eventType.bullet { event.move(event.dir) }
+		}
+		
+		
+		
 		newDraw()
 		
 		// Bullet turn
@@ -346,6 +353,11 @@ class GameScene: SKScene {
 	func turnSpecial()
 	{
 		println("-   TURN | Special")
+		
+		for (index, event) in enumerate(events.activeEvents) {
+			if event.type == eventType.bullet { event.move(event.dir) }
+		}
+		
 		newDraw()
 	}
    

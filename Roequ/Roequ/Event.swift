@@ -13,15 +13,28 @@ class Event
 {
 	var x:Int = 0
 	var y:Int = 0
+	var type:eventType!
+	var dir:direction!
 	
-	init(spawnX:Int,spawnY:Int,type:eventType,dir:direction)
+	init(spawnX:Int,spawnY:Int,newType:eventType,newDir:direction)
 	{
 		x = spawnX
 		y = spawnY
+		type = newType
+		dir = newDir
 	}
 	
 	func generate()
 	{
 		
 	}
+	
+	func move(dir:direction)
+	{
+		if dir == direction.top { y += 1 }
+		if dir == direction.right { x += 1 }
+		if dir == direction.down { y -= 1 }
+		if dir == direction.left { x -= 1 }
+	}
+	
 }

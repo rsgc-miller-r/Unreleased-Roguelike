@@ -25,7 +25,7 @@ class Events
 	
 	func addEvent(x:Int,y:Int,type:eventType,dir:direction)
 	{
-		let test = Event(spawnX: x, spawnY: y,type:type,dir:dir)
+		let test = Event(spawnX: x, spawnY: y,newType:type,newDir:dir)
 		activeEvents.append(test)
 		
 		println("Events: \(activeEvents)")
