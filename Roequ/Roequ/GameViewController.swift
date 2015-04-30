@@ -36,6 +36,7 @@ class GameViewController: UIViewController
             // Configure the view.
             let skView = self.view as! SKView
 			
+			
             /* Sprite Kit applies additional optimizations to improve rendering performance */
             skView.ignoresSiblingOrder = true
             
@@ -68,6 +69,12 @@ class GameViewController: UIViewController
     }
 
     override func prefersStatusBarHidden() -> Bool {
-        return true
+		return true
     }
+	
+	@IBAction func fireButton(sender: AnyObject) {
+		println("FIRE")
+	}
+	
+	
 }

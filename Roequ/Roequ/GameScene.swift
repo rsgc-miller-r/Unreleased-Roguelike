@@ -24,9 +24,10 @@ let tileCountX:CGFloat = 39
 let tileCountY:CGFloat = 39
 var tileSizeX:CGFloat = 0
 var tileSizeY:CGFloat = 0
+
+var events:Events!
 var currentStage:Stage!
 var player:Player!
-
 
 var screenSize:CGRect = CGRectMake(0, 0, 0, 0)
 
@@ -42,6 +43,7 @@ class GameScene: SKScene {
 		tileSizeY = tileSizeX * 1.5
 		
 		currentStage = Stage()
+		events = Events()
 		player = Player(spawn: currentStage.spawn)
 		
 //		gameView()
@@ -50,6 +52,8 @@ class GameScene: SKScene {
 		scene?.addChild(renderCanvas)
 		renderCanvas.size = view.frame.size
 		renderCanvas.position = CGPoint(x: 0, y: 0 )
+		
+		events.addEvent(player.x, y: player.y+2)
 		
 		newDraw()
 		
@@ -79,7 +83,8 @@ class GameScene: SKScene {
 				let currentIndex = currentStage.indexAtLocation(x + horizontalOffset, y: y + verticalOffset)
 				let currentPosition = CGPoint(x: tileSizeX * CGFloat(x), y: tileSizeY * CGFloat(y) )
 				
-				if x == Int(horizontalTiles/2) && y == Int(verticalTiles/2) { spritePlayer(context, index: currentIndex, position: currentPosition) }
+				if (events.eventAtLocation(x + horizontalOffset, y: y + verticalOffset) != nil) { spriteMissing(context, index: currentIndex, position: currentPosition) }
+				else if x == Int(horizontalTiles/2) && y == Int(verticalTiles/2) { spritePlayer(context, index: currentIndex, position: currentPosition) }
 				else if( targetTile == tile.section ){ spriteSection(context, index: currentIndex, position: currentPosition) }
 				else if( targetTile == tile.limit ){ spriteLimit(context, index: currentIndex, position: currentPosition) }
 				else if( targetTile == tile.wall ){ spriteWall(context, index: currentIndex, position: currentPosition) }
@@ -116,7 +121,6 @@ class GameScene: SKScene {
 		let color = UIColor.redColor()
 		
 		drawLine(context, origin: CGPoint(x: center.x - tileSizeX/4, y: center.y + tileSizeX/4), destination: CGPoint(x: center.x + tileSizeX/4, y: center.y + tileSizeX/4), color: color )
-		
 	}
 	
 	func spriteOutside(context:CGContextRef, index:Int, position:CGPoint)
