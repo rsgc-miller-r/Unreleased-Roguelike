@@ -20,6 +20,16 @@ enum tile:UInt32 {
 	case limit = 99
 }
 
+enum eventType:UInt32 {
+	case bullet = 1
+}
+enum direction:UInt32 {
+	case top = 1
+	case right = 2
+	case down = 3
+	case left = 4
+}
+
 let tileCountX:CGFloat = 39
 let tileCountY:CGFloat = 39
 var tileSizeX:CGFloat = 0
@@ -52,8 +62,6 @@ class GameScene: SKScene {
 		scene?.addChild(renderCanvas)
 		renderCanvas.size = view.frame.size
 		renderCanvas.position = CGPoint(x: 0, y: 0 )
-		
-		events.addEvent(player.x, y: player.y+2)
 		
 		newDraw()
 		
@@ -327,6 +335,17 @@ class GameScene: SKScene {
 	
 	func turn()
 	{
+		println("-   TURN | Normal")
+
+		newDraw()
+		
+		// Bullet turn
+		var timer = NSTimer.scheduledTimerWithTimeInterval(0.5, target: self, selector: Selector("turnSpecial"), userInfo: nil, repeats: false)
+	}
+	
+	func turnSpecial()
+	{
+		println("-   TURN | Special")
 		newDraw()
 	}
    

@@ -14,11 +14,13 @@ class Player
 	var position:CGPoint = CGPoint()
 	var x:Int = 0
 	var y:Int = 0
+	var dir:direction!
 	
 	init(spawn:CGPoint)
 	{
 		println("+ PLAYER | Created at: \(spawn)")
 		position = spawn
+		dir = direction.top
 		x = Int(position.x)
 		y = Int(position.y)
 	}

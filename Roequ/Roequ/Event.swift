@@ -14,7 +14,7 @@ class Event
 	var x:Int = 0
 	var y:Int = 0
 	
-	init(spawnX:Int,spawnY:Int)
+	init(spawnX:Int,spawnY:Int,type:eventType,dir:direction)
 	{
 		x = spawnX
 		y = spawnY

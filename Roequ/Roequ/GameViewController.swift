@@ -77,8 +77,8 @@ class GameViewController: UIViewController
 	@IBAction func fireButton(sender: AnyObject) {
 		println("FIRE")
 		
-		events.addEvent(player.x, y: player.y)
-		sceneTest.newDraw()
+		events.addEvent(player.x, y: player.y-1, type: eventType.bullet, dir: player.dir)
+		sceneTest.turn()
 	}
 	
 	
