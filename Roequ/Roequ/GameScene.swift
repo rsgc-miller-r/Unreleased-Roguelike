@@ -27,28 +27,41 @@ var tileSizeY:CGFloat = 0
 var currentStage:Stage!
 var player:Player!
 
+
+var screenSize:CGRect = CGRectMake(0, 0, 0, 0)
+
+var renderCanvas = SKSpriteNode()
+let renderScale:CGFloat = 2
+let renderSize = CGSizeMake(screenSize.width/renderScale, screenSize.height/renderScale)
+
 class GameScene: SKScene {
 	
     override func didMoveToView(view: SKView)
 	{
 		tileSizeX = self.frame.size.width/CGFloat(tileCountX)
-		tileSizeY = tileSizeX * 1.3
+		tileSizeY = tileSizeX * 1
 		
 		currentStage = Stage()
 		player = Player(spawn: currentStage.spawn)
 		
 //		gameView()
-		mapView()
+//		mapView()
+		
+		scene?.addChild(renderCanvas)
+		renderCanvas.size = view.frame.size
+		renderCanvas.position = CGPoint(x: 0, y: 0 )
+		
+		newDraw()
+		
     }
 	
-	func gameView()
+	func newDraw()
 	{
 		let viewScale:CGFloat = 2
-		let tileSizeX = self.frame.size.width/CGFloat(tileCountX/viewScale)
-		let tileSizeY = tileSizeX * 1.5
-		let offsetX:CGFloat = (tileSizeX/2)
-		let offsetY:CGFloat = (tileSizeY/2)
-		let stage = currentStage.activeStage
+		
+		UIGraphicsBeginImageContextWithOptions( renderSize, false, 0)
+		var context = UIGraphicsGetCurrentContext()
+		CGContextSetShouldAntialias(context, false)
 		
 		let horizontalTiles = tileCountX/viewScale
 		let verticalTiles = tileCountY/viewScale
@@ -59,8 +72,79 @@ class GameScene: SKScene {
 			var y = 0
 			while y < Int(verticalTiles) {
 				
+				let horizontalOffset = player.x - Int(horizontalTiles/2)
+				let verticalOffset = player.y - Int(verticalTiles/2) - 1
+				
+				let targetTile = currentStage.tileAtLocation(x + horizontalOffset, y: y + verticalOffset )
+				
+				if( targetTile == tile.floor ){
+					
+					CGContextAddRect(context, CGRectMake(tileSizeX * CGFloat(x),tileSizeY * CGFloat(y),4,4))
+					CGContextSetFillColorWithColor(context, UIColor.whiteColor().CGColor)
+					CGContextFillPath(context)
+					
+				}
+				else if( targetTile == tile.section ){
+						
+						CGContextAddRect(context, CGRectMake(tileSizeX * CGFloat(x),tileSizeY * CGFloat(y),4,4))
+						CGContextSetFillColorWithColor(context, UIColor.redColor().CGColor)
+						CGContextFillPath(context)
+						
+					}
+				else if( targetTile == tile.limit ){
+					
+					CGContextAddRect(context, CGRectMake(tileSizeX * CGFloat(x),tileSizeY * CGFloat(y),2,2))
+					CGContextSetFillColorWithColor(context, UIColor.cyanColor().CGColor)
+					CGContextFillPath(context)
+					
+				}
+				
+				// Add Player
+				if x == Int(horizontalTiles/2) && y == Int(verticalTiles/2) {
+					
+					CGContextAddRect(context, CGRectMake(tileSizeX * CGFloat(x),tileSizeY * CGFloat(y),2,2))
+					CGContextSetFillColorWithColor(context, UIColor.orangeColor().CGColor)
+					CGContextFillPath(context)
+				}
+				
+				y += 1
+			}
+			
+			x += 1
+		}
+		
+		
+		let screenSave = UIGraphicsGetImageFromCurrentImageContext()
+		UIGraphicsEndImageContext()
+		
+		let texture = SKTexture(image: screenSave)
+		texture.filteringMode = SKTextureFilteringMode.Nearest
+		renderCanvas.texture = texture
+	}
+	
+	func gameView()
+	{
+
+		let viewScale:CGFloat = 2
+		let tileSizeX = self.frame.size.width/CGFloat(tileCountX/viewScale)
+		let tileSizeY = tileSizeX * 1.5
+		let offsetX:CGFloat = (tileSizeX/2)
+		let offsetY:CGFloat = (tileSizeY/2)
+		let stage = currentStage.activeStage
+		
+		let horizontalTiles = tileCountX/viewScale
+		let verticalTiles = tileCountY/viewScale
+		
+		println("\(tileSizeX) x \(tileSizeY)")
+		
+		var x = 0
+		while x < Int(horizontalTiles) {
+			
+			var y = 0
+			while y < Int(verticalTiles) {
+				
 				let sprite = SKSpriteNode(color: UIColor.redColor(), size: CGSize(width: tileSizeX, height: tileSizeY))
-				sprite.position = CGPoint(x: CGFloat(x) * tileSizeX + offsetX, y: CGFloat(y) * tileSizeY + offsetY)
+				sprite.position = CGPoint(x: CGFloat(x) * tileSizeX + offsetX - screenSize.size.width/2, y: CGFloat(y) * tileSizeY + offsetY)
 				
 				let horizontalOffset = player.x - Int(horizontalTiles/2)
 				let verticalOffset = player.y - Int(verticalTiles/2) - 1
@@ -91,7 +175,7 @@ class GameScene: SKScene {
 			}
 			x += 1
 		}
-		
+	
 	}
 	
 	func mapView()
@@ -144,14 +228,15 @@ class GameScene: SKScene {
 	{
         for touch in (touches as! Set<UITouch>) {
             let location = touch.locationInNode(self)
-			println("touched:\(location.x) \(location.y)")
+			
+			println("!  TOUCH | x: \(location.x) y: \(location.y)")
 			
 			var xMod = 0
 			var yMod = 0
 			
-			if location.y > 380 { yMod = 1 }
-			else if location.y < 60   { yMod = -1 }
-			else if location.x < 160   { xMod = -1 }
+			if location.y > 150 { yMod = -1 }
+			else if location.y < -150   { yMod = 1 }
+			else if location.x < 0   { xMod = -1 }
 			else { xMod = 1 }
 			
 			var destination = currentStage.tileAtLocation(player.x + xMod, y: player.y + yMod - 1)
@@ -169,8 +254,7 @@ class GameScene: SKScene {
 	
 	func turn()
 	{
-		self.removeAllChildren()
-		gameView()
+		newDraw()
 	}
    
     override func update(currentTime: CFTimeInterval) {

@@ -40,7 +40,7 @@ class Stage
 		
 		if( stageSize() < 150 ){
 			println("!  WORLD | Too small:\(stageSize())")
-			generate()
+//			generate()
 		}
 			/*
 		else if (find(activeStage, tile.pickup) == nil) {
