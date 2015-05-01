@@ -17,6 +17,7 @@ enum tile:UInt32 {
 	case spawn = 8
 	case exit = 9
 	case pickup = 10
+	case bullet = 11
 	case limit = 99
 }
 
@@ -28,6 +29,10 @@ enum direction:UInt32 {
 	case right = 2
 	case down = 3
 	case left = 4
+	case topleft = 5
+	case topright = 6
+	case downleft = 7
+	case downright = 8
 }
 
 let tileCountX:CGFloat = 39
@@ -49,8 +54,11 @@ class GameScene: SKScene {
 	
     override func didMoveToView(view: SKView)
 	{
-		tileSizeX = self.frame.size.width/CGFloat(tileCountX)
-		tileSizeY = tileSizeX * 1.5
+		tileSizeX = floor(self.frame.size.width/CGFloat(tileCountX)) + 1
+		tileSizeY = floor(tileSizeX * 1.5)
+		
+		tileSizeX = 7
+		tileSizeY = 11
 		
 		currentStage = Stage()
 		events = Events()
@@ -91,7 +99,9 @@ class GameScene: SKScene {
 				let currentIndex = currentStage.indexAtLocation(x + horizontalOffset, y: y + verticalOffset)
 				let currentPosition = CGPoint(x: tileSizeX * CGFloat(x), y: tileSizeY * CGFloat(y) )
 				
-				if (events.eventAtLocation(x + horizontalOffset, y: y + verticalOffset) != nil) { spriteMissing(context, index: currentIndex, position: currentPosition) }
+				let targetEvent = events.eventAtLocation(x + horizontalOffset, y: y + verticalOffset)
+				
+				if targetEvent?.sprite == tile.bullet { spriteBullet(context, index: currentIndex, position: currentPosition, event:targetEvent ) }
 				else if x == Int(horizontalTiles/2) && y == Int(verticalTiles/2) { spritePlayer(context, index: currentIndex, position: currentPosition) }
 				else if( targetTile == tile.section ){ spriteSection(context, index: currentIndex, position: currentPosition) }
 				else if( targetTile == tile.limit ){ spriteLimit(context, index: currentIndex, position: currentPosition) }
@@ -99,7 +109,6 @@ class GameScene: SKScene {
 				else if( targetTile == tile.floor ){ spriteFloor(context, index: currentIndex, position: currentPosition) }
 				else if( targetTile == tile.outside ){ spriteOutside(context, index: currentIndex, position: currentPosition) }
 				else {
-					println("Missing sprite:\(targetTile.rawValue)")
 					spriteMissing(context, index: currentIndex, position: currentPosition)
 				}
 				
@@ -120,6 +129,44 @@ class GameScene: SKScene {
 	
 	// MARK: Sprites -
 	
+	func spriteBullet(context:CGContextRef, index:Int, position:CGPoint, event:Event?)
+	{
+		let currentX:Int = Int(index % Int(tileCountX))
+		let currentY:Int = Int(index / Int(tileCountY))
+		
+		let center:CGPoint = CGPoint(x: position.x + 4, y: position.y + 5)
+		var color = UIColor.yellowColor()
+		
+		if event?.life == 3 { color = UIColor.yellowColor() }
+		else if event?.life == 2 { color = UIColor.orangeColor() }
+		else if event?.life == 1 { color = UIColor.redColor() }
+		else if event?.life == 0 { color = UIColor.grayColor() }
+		else { color = UIColor.whiteColor() }
+		
+		if event?.dir == direction.top || event?.dir == direction.down {
+			drawLine(context, origin: CGPoint(x: center.x, y: center.y - 2), destination: CGPoint(x: center.x, y: center.y + 2), color: color )
+		}
+		if event?.dir == direction.left || event?.dir == direction.right{
+			drawLine(context, origin: CGPoint(x: center.x - 2, y: center.y), destination: CGPoint(x: center.x + 2, y: center.y), color: color )
+		}
+		if event?.dir == direction.downleft {
+			drawLine(context, origin: center, destination: CGPoint(x: center.x + 2, y: center.y), color: color )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + 2), color: color )
+		}
+		if event?.dir == direction.downright {
+			drawLine(context, origin: center, destination: CGPoint(x: center.x - 2, y: center.y), color: color )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + 2), color: color )
+		}
+		if event?.dir == direction.topleft {
+			drawLine(context, origin: center, destination: CGPoint(x: center.x + 2, y: center.y), color: color )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - 2), color: color )
+		}
+		if event?.dir == direction.topright {
+			drawLine(context, origin: center, destination: CGPoint(x: center.x - 2, y: center.y), color: color )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - 2), color: color )
+		}
+	}
+
 	func spriteMissing(context:CGContextRef, index:Int, position:CGPoint)
 	{
 		let currentX:Int = Int(index % Int(tileCountX))
@@ -130,6 +177,7 @@ class GameScene: SKScene {
 		
 		drawLine(context, origin: CGPoint(x: center.x - tileSizeX/4, y: center.y + tileSizeX/4), destination: CGPoint(x: center.x + tileSizeX/4, y: center.y + tileSizeX/4), color: color )
 	}
+	
 	
 	func spriteOutside(context:CGContextRef, index:Int, position:CGPoint)
 	{
@@ -171,13 +219,22 @@ class GameScene: SKScene {
 	{
 		let currentX:Int = Int(index % Int(tileCountX))
 		let currentY:Int = Int(index / Int(tileCountY))
+		let color = UIColor.orangeColor()
 		
-		let center:CGPoint = CGPoint(x: position.x + tileSizeX/2, y: position.y + tileSizeY/2)
+		let center:CGPoint = CGPoint(x: position.x + 4, y: position.y + 6)
 		
-		drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - tileSizeX/4), color: UIColor.orangeColor() )
-		drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + tileSizeX/4), color: UIColor.orangeColor() )
-		drawLine(context, origin: center, destination: CGPoint(x: center.x - tileSizeX/4, y: center.y), color: UIColor.orangeColor() )
-		drawLine(context, origin: center, destination: CGPoint(x: center.x + tileSizeX/4, y: center.y), color: UIColor.orangeColor() )
+		if player.dir == direction.down { drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - 2), color: color ) }
+		if player.dir == direction.top { drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + 2), color: color ) }
+		if player.dir == direction.right { drawLine(context, origin: center, destination: CGPoint(x: center.x + 2, y: center.y), color: color ) }
+		if player.dir == direction.left { drawLine(context, origin: center, destination: CGPoint(x: center.x - 2, y: center.y), color: color ) }
+		
+		drawLine(context, origin: CGPoint(x: center.x - 2, y: center.y - 2), destination: CGPoint(x: center.x + 2, y: center.y - 2), color: color )
+		drawLine(context, origin: CGPoint(x: center.x - 2, y: center.y + 2), destination: CGPoint(x: center.x + 2, y: center.y + 2), color: color )
+		
+		drawLine(context, origin: CGPoint(x: center.x - 2, y: center.y - 2), destination: CGPoint(x: center.x - 2, y: center.y + 2), color: color )
+		drawLine(context, origin: CGPoint(x: center.x + 2, y: center.y - 2), destination: CGPoint(x: center.x + 2, y: center.y + 2), color: color )
+		
+		drawLine(context, origin: CGPoint(x: center.x - 2, y: center.y + 4), destination: CGPoint(x: center.x + 2, y: center.y + 4), color: UIColor.grayColor() )
 		
 	}
 	
@@ -198,26 +255,26 @@ class GameScene: SKScene {
 		let currentX:Int = Int(index % Int(tileCountX))
 		let currentY:Int = Int(index / Int(tileCountY))
 		
-		let center:CGPoint = CGPoint(x: position.x + tileSizeX/2, y: position.y + tileSizeY/2)
+		let center:CGPoint = CGPoint(x: position.x + 4, y: position.y + 5)
 		let color = UIColor(white: 0.2, alpha: 1)
 		
 		if currentStage.tileAtLocation(currentX+1, y: currentY) == tile.section {
-			drawLine(context, origin: center, destination: CGPoint(x: center.x + tileSizeX/4, y: center.y), color: color )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x + 2, y: center.y), color: color )
 		}
 		if currentStage.tileAtLocation(currentX-1, y: currentY) == tile.section {
-			drawLine(context, origin: center, destination: CGPoint(x: center.x - tileSizeX/4, y: center.y), color: color )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x - 2, y: center.y), color: color )
 		}
 		if currentStage.tileAtLocation(currentX, y: currentY+1) == tile.section {
-			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + tileSizeX/4), color: color )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + 2), color: color )
 		}
 		if currentStage.tileAtLocation(currentX, y: currentY-1) == tile.section {
-			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - tileSizeX/4), color: color )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - 2), color: color )
 		}
 		if currentStage.tileAtLocation(currentX, y: currentY-1) == tile.floor && currentStage.tileAtLocation(currentX, y: currentY+1) == tile.floor && currentStage.tileAtLocation(currentX+1, y: currentY) == tile.floor && currentStage.tileAtLocation(currentX-1, y: currentY) == tile.floor {
-			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - tileSizeX/4), color: color )
-			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + tileSizeX/4), color: color )
-			drawLine(context, origin: center, destination: CGPoint(x: center.x - tileSizeX/4, y: center.y), color: color )
-			drawLine(context, origin: center, destination: CGPoint(x: center.x + tileSizeX/4, y: center.y), color: color )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - 2), color: color )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + 2), color: color )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x - 2, y: center.y), color: color )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x + 2, y: center.y), color: color )
 		}
 	}
 	
@@ -226,25 +283,25 @@ class GameScene: SKScene {
 		let currentX:Int = Int(index % Int(tileCountX))
 		let currentY:Int = Int(index / Int(tileCountY))
 		
-		let center:CGPoint = CGPoint(x: position.x + tileSizeX/2, y: position.y + tileSizeY/2)
+		let center:CGPoint = CGPoint(x: position.x + 4, y: position.y + 6)
 		
 		if currentStage.tileAtLocation(currentX+1, y: currentY) == tile.wall {
-			drawLine(context, origin: center, destination: CGPoint(x: center.x + tileSizeX/2, y: center.y), color: UIColor.whiteColor() )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x + 3, y: center.y), color: UIColor.whiteColor() )
 		}
 		if currentStage.tileAtLocation(currentX-1, y: currentY) == tile.wall {
-			drawLine(context, origin: center, destination: CGPoint(x: center.x - tileSizeX/2, y: center.y), color: UIColor.whiteColor() )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x - 3, y: center.y), color: UIColor.whiteColor() )
 		}
 		if currentStage.tileAtLocation(currentX, y: currentY+1) == tile.wall {
-			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + tileSizeX/2), color: UIColor.whiteColor() )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + 5), color: UIColor.whiteColor() )
 		}
 		if currentStage.tileAtLocation(currentX, y: currentY-1) == tile.wall {
-			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - tileSizeX/2), color: UIColor.whiteColor() )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - 5), color: UIColor.whiteColor() )
 		}
 		if currentStage.tileAtLocation(currentX, y: currentY-1) == tile.floor && currentStage.tileAtLocation(currentX, y: currentY+1) == tile.floor && currentStage.tileAtLocation(currentX+1, y: currentY) == tile.floor && currentStage.tileAtLocation(currentX-1, y: currentY) == tile.floor {
-			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - tileSizeX/2), color: UIColor.whiteColor() )
-			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + tileSizeX/2), color: UIColor.whiteColor() )
-			drawLine(context, origin: center, destination: CGPoint(x: center.x - tileSizeX/2, y: center.y), color: UIColor.whiteColor() )
-			drawLine(context, origin: center, destination: CGPoint(x: center.x + tileSizeX/2, y: center.y), color: UIColor.whiteColor() )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y - 5), color: UIColor.whiteColor() )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x, y: center.y + 5), color: UIColor.whiteColor() )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x - 3, y: center.y), color: UIColor.whiteColor() )
+			drawLine(context, origin: center, destination: CGPoint(x: center.x + 3, y: center.y), color: UIColor.whiteColor() )
 		}
 	}
 	
@@ -255,7 +312,7 @@ class GameScene: SKScene {
 		CGContextMoveToPoint(context, origin.x,origin.y)
 		CGContextAddLineToPoint(context, destination.x, destination.y)
 		CGContextSetStrokeColorWithColor(context, color.CGColor)
-		CGContextSetLineWidth(context, 1)
+		CGContextSetLineWidth(context,1)
 		CGContextStrokePath(context)
 	}
 	
@@ -315,10 +372,10 @@ class GameScene: SKScene {
 			var xMod = 0
 			var yMod = 0
 			
-			if location.y > 150 { yMod = -1 }
-			else if location.y < -150   { yMod = 1 }
-			else if location.x < 0   { xMod = -1 }
-			else { xMod = 1 }
+			if location.y > 150 { yMod = -1; player.dir = direction.down }
+			else if location.y < -150   { yMod = 1; player.dir = direction.top }
+			else if location.x < 0   { xMod = -1; player.dir = direction.left }
+			else { xMod = 1; player.dir = direction.right }
 			
 			var destination = currentStage.tileAtLocation(player.x + xMod, y: player.y + yMod - 1)
 			
@@ -337,17 +394,16 @@ class GameScene: SKScene {
 	{
 		println("-   TURN | Normal")
 
-		
 		for (index, event) in enumerate(events.activeEvents) {
+			event.collide(currentStage.tileAtLocation(event.x, y: event.y))
 			if event.type == eventType.bullet { event.move(event.dir) }
 		}
-		
-		
 		
 		newDraw()
 		
 		// Bullet turn
-		var timer = NSTimer.scheduledTimerWithTimeInterval(0.5, target: self, selector: Selector("turnSpecial"), userInfo: nil, repeats: false)
+		var timer = NSTimer.scheduledTimerWithTimeInterval(0.05, target: self, selector: Selector("turnSpecial"), userInfo: nil, repeats: false)
+		removeDeadEvents()
 	}
 	
 	func turnSpecial()
@@ -355,10 +411,21 @@ class GameScene: SKScene {
 		println("-   TURN | Special")
 		
 		for (index, event) in enumerate(events.activeEvents) {
+			println("Collided with \(currentStage.tileAtLocation(event.x, y: event.y).rawValue)")
+			event.collide(currentStage.tileAtLocation(event.x, y: event.y))
 			if event.type == eventType.bullet { event.move(event.dir) }
 		}
 		
 		newDraw()
+		removeDeadEvents()
+	}
+	
+	func removeDeadEvents()
+	{
+		for (index, event) in enumerate(events.activeEvents) {
+			if event.life < 0 { events.activeEvents.removeAtIndex(index) }
+			break
+		}
 	}
    
     override func update(currentTime: CFTimeInterval) {
